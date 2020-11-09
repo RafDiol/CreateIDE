@@ -20,23 +20,39 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Configuration.Xml;
+using System.Buffers;
+using Path = System.IO.Path;
+using System.Globalization;
 
-namespace YourIDE
+namespace CreateIDE
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        // Constants
+        const string VERSION = "1.0.0";
+
         CompletionWindow completionWindow;
         IList<ICompletionData> completionListData;
+        IO_Handler ioHandler;
+        string projectName, projectVersion, projectPath;
+        string text = "";
+        Encoding encoding = Encoding.UTF8;
+        private object dummyNode = null;
         public MainWindow()
         {
             InitializeComponent();
+            // Initialize some components
+            ioHandler = new IO_Handler();
+            // Do some visual stuff
             textEditor.ShowLineNumbers = true;
             // For code completion
             textEditor.TextArea.TextEntering += textEditor_TextArea_TextEntering;
             textEditor.TextArea.TextEntered += textEditor_TextArea_TextEntered;
+            // File Viewer
+            CreateFileView();
         }
 
         void textEditor_TextArea_TextEntered(object sender, TextCompositionEventArgs e)
@@ -146,8 +162,195 @@ namespace YourIDE
             // Non Categorized
             completionListData.Add(new CompletionData("using", "using keyword"));
         }   
+
+
+        private void OpenProject(object sender, RoutedEventArgs e)
+        {
+            OpenProject();
+        } // Just calls the overload
+        private void OpenProject()
+        {
+            try
+            {
+                ioHandler.OpenProject(encoding, out projectPath, out projectName, out projectVersion);
+            } catch (IOException)
+            {
+                // The user did not select a file so break
+                return;
+            } catch (IndexOutOfRangeException)
+            {
+                MessageBox.Show("The project file is either corrupted or out of date", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            // Configure accordingly
+            if (text != textEditor.Text)
+            {
+                // Save
+            }
+            CreateFileView();
+            this.Title = $"{projectName} - CreateIDE";
+        }
+
+
+        private void SaveAsProject(object sender, RoutedEventArgs e)
+        {
+            SaveAsProject();
+        } // Just calls the overload
+        private void SaveAsProject()
+        {
+            try
+            {
+                ioHandler.SaveAsProject(VERSION, out projectPath, out projectName);
+            } catch (IOException)
+            {
+                // The user did not select a file
+                return;
+            }
+            // Configure accordingly
+            if (text != textEditor.Text)
+            {
+                // Save
+            }
+            this.Title = $"{projectName} - CreateIDE";
+            CreateFileView();
+        }
+
+        private void Exit(object sender, RoutedEventArgs e)
+        {
+            // Check  if there are unsaved changes
+            Application.Current.Shutdown();
+        }
+
+        // The following methods have to do with the file viewer
+        private void CreateFileView()
+        {
+            fileViewer.Items.Clear();
+            if (projectPath == null)
+            {
+                return;
+            } // So no Exception occurs during runtime
+
+            Console.WriteLine("project path:" + projectPath);
+
+            foreach (string s in Directory.GetFileSystemEntries(projectPath, "*", SearchOption.TopDirectoryOnly))
+            {
+                TreeViewItem item = new TreeViewItem();
+                StylizeTreeViewItem(s, item);
+                item.Tag = s;
+                item.FontWeight = FontWeights.Normal;
+                item.Expanded += new RoutedEventHandler(folder_Expanded);
+                item.MouseRightButtonUp += FileViewElementRightClicked;
+                fileViewer.Items.Add(item);
+            }
+        }
+        private void FileViewElementRightClicked(object sender, MouseButtonEventArgs e)
+        {
+            TreeViewItem SelectedItem = sender as TreeViewItem;
+            FileAttributes attr = File.GetAttributes(SelectedItem.Tag.ToString());
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                fileViewer.ContextMenu = fileViewer.Resources["FolderContext"] as System.Windows.Controls.ContextMenu;
+                fileViewer.ContextMenuClosing += fileViewerContextMenuClosing;
+                return;
+            }
+        }
+        private void fileViewerContextMenuClosing(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void StylizeTreeViewItem(string s, TreeViewItem item)
+        {
+            string filename;
+            FileAttributes attr = File.GetAttributes(s);
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+                item.Header = CustomizeTreeViewItem(Path.GetFileName(s), "Icons/folder.png");
+                item.Items.Add(dummyNode);
+            }
+            else
+            {
+                filename = Path.GetFileName(s);
+                if (filename.EndsWith(".cs")) // C#
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/cs.png");
+                }
+                else if (filename.EndsWith(".py")) // Python
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/python.png");
+                }
+                else if (filename.EndsWith(".sql") || filename.EndsWith(".awtb") || filename.EndsWith(".db") || filename.EndsWith(".dat") || filename.EndsWith(".php") || filename.EndsWith(".php4") || filename.EndsWith(".php5")) // Database
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/db.png");
+                }
+                else if (filename.EndsWith(".xml"))
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/xml.png");
+                }
+                else if (filename.EndsWith(".txt"))
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/txt.png");
+                }
+                else if (filename.EndsWith(".png") || filename.EndsWith(".jpg") || filename.EndsWith(".jpeg") || filename.EndsWith(".bmp") || filename.EndsWith(".svg"))
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/img.png");
+                }
+                else if (filename.EndsWith(".prj"))
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/project.png");
+                }
+                else
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/unknown.png");
+                }
+            }
+        }
+        private StackPanel CustomizeTreeViewItem(object itemObj, string path)
+        {
+            // Add Icon
+            // Create Stack Panel
+            StackPanel stkPanel = new StackPanel();
+            stkPanel.Orientation = Orientation.Horizontal;
+
+            // Create Image
+            Image img = new Image();
+            img.Source = new BitmapImage(new Uri(path, UriKind.Relative));
+            img.Width = 20;
+            img.Height = 20;
+
+            // Create TextBlock
+            TextBlock lbl = new TextBlock();
+            lbl.Text = itemObj.ToString();
+
+            // Add to stack
+            stkPanel.Children.Add(img);
+            stkPanel.Children.Add(lbl);
+
+            return stkPanel;
+        }
+        void folder_Expanded(object sender, RoutedEventArgs e)
+        {
+            TreeViewItem item = (TreeViewItem)sender;
+            if (item.Items.Count == 1 && item.Items[0] == dummyNode)
+            {
+                item.Items.Clear();
+                try
+                {
+                    foreach (string s in Directory.GetFileSystemEntries(item.Tag.ToString(), "*", SearchOption.TopDirectoryOnly))
+                    {
+                        TreeViewItem subitem = new TreeViewItem();
+                        StylizeTreeViewItem(s, subitem);
+                        subitem.Tag = s;
+                        subitem.FontWeight = FontWeights.Normal;
+                        subitem.Expanded += new RoutedEventHandler(folder_Expanded);
+                        item.Items.Add(subitem);
+                    }
+                }
+                catch (Exception) { }
+            }
+        }
     }
 
+    // The class for the autocompletion items
     public class CompletionData : ICompletionData
     {
         public CompletionData(string text, string description)
