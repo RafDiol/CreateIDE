@@ -106,3 +106,6 @@ C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\db.png
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\img.png
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\txt.png
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\project.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\dll.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\pdf.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\zip.png

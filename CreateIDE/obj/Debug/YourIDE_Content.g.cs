@@ -9,7 +9,9 @@
 //------------------------------------------------------------------------------
 
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/cs.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/dll.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/img.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/pdf.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/project.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/txt.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/xml.png")]
@@ -17,5 +19,6 @@
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/db.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/unknown.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/folder.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/zip.png")]
 
 

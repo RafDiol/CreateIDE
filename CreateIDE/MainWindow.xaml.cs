@@ -11,11 +11,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using Size = System.Drawing.Size;
 using System.Windows.Shapes;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
+using System.Windows.Forms;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
@@ -23,6 +25,10 @@ using Microsoft.Extensions.Configuration.Xml;
 using System.Buffers;
 using Path = System.IO.Path;
 using System.Globalization;
+using Clipboard = System.Windows.Clipboard;
+using Orientation = System.Windows.Controls.Orientation;
+using MessageBox = System.Windows.Forms.MessageBox;
+using System.Collections.Specialized;
 
 namespace CreateIDE
 {
@@ -53,6 +59,7 @@ namespace CreateIDE
             textEditor.TextArea.TextEntered += textEditor_TextArea_TextEntered;
             // File Viewer
             CreateFileView();
+            fileViewer.ContextMenuClosing += fileViewerContextMenuClosing;
         }
 
         void textEditor_TextArea_TextEntered(object sender, TextCompositionEventArgs e)
@@ -65,7 +72,8 @@ namespace CreateIDE
                 completionListData = completionWindow.CompletionList.CompletionData;
                 AssignCompletionDataToWindow();
                 completionWindow.Show();
-                completionWindow.Closed += delegate {
+                completionWindow.Closed += delegate
+                {
                     completionWindow = null;
                 };
             }
@@ -161,7 +169,7 @@ namespace CreateIDE
             completionListData.Add(new CompletionData("throw", "throw keyword"));
             // Non Categorized
             completionListData.Add(new CompletionData("using", "using keyword"));
-        }   
+        }
 
 
         private void OpenProject(object sender, RoutedEventArgs e)
@@ -173,13 +181,15 @@ namespace CreateIDE
             try
             {
                 ioHandler.OpenProject(encoding, out projectPath, out projectName, out projectVersion);
-            } catch (IOException)
+            }
+            catch (IOException)
             {
                 // The user did not select a file so break
                 return;
-            } catch (IndexOutOfRangeException)
+            }
+            catch (IndexOutOfRangeException)
             {
-                MessageBox.Show("The project file is either corrupted or out of date", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("The project file is either corrupted or out of date", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             // Configure accordingly
@@ -201,7 +211,8 @@ namespace CreateIDE
             try
             {
                 ioHandler.SaveAsProject(VERSION, out projectPath, out projectName);
-            } catch (IOException)
+            }
+            catch (IOException)
             {
                 // The user did not select a file
                 return;
@@ -218,7 +229,7 @@ namespace CreateIDE
         private void Exit(object sender, RoutedEventArgs e)
         {
             // Check  if there are unsaved changes
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
         }
 
         // The following methods have to do with the file viewer
@@ -230,7 +241,6 @@ namespace CreateIDE
                 return;
             } // So no Exception occurs during runtime
 
-            Console.WriteLine("project path:" + projectPath);
 
             foreach (string s in Directory.GetFileSystemEntries(projectPath, "*", SearchOption.TopDirectoryOnly))
             {
@@ -246,17 +256,12 @@ namespace CreateIDE
         private void FileViewElementRightClicked(object sender, MouseButtonEventArgs e)
         {
             TreeViewItem SelectedItem = sender as TreeViewItem;
-            FileAttributes attr = File.GetAttributes(SelectedItem.Tag.ToString());
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                fileViewer.ContextMenu = fileViewer.Resources["FolderContext"] as System.Windows.Controls.ContextMenu;
-                fileViewer.ContextMenuClosing += fileViewerContextMenuClosing;
-                return;
-            }
+
+            fileViewer.ContextMenu = fileViewer.Resources["ContextMenu"] as System.Windows.Controls.ContextMenu;
         }
         private void fileViewerContextMenuClosing(object sender, RoutedEventArgs e)
         {
-
+            fileViewer.ContextMenu = null;
         }
         private void StylizeTreeViewItem(string s, TreeViewItem item)
         {
@@ -297,6 +302,18 @@ namespace CreateIDE
                 else if (filename.EndsWith(".prj"))
                 {
                     item.Header = CustomizeTreeViewItem(filename, "/Icons/project.png");
+                }
+                else if (filename.EndsWith(".dll"))
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/dll.png");
+                }
+                else if (filename.EndsWith(".zip") || filename.EndsWith(".rar") || filename.EndsWith(".7z"))
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/zip.png");
+                }
+                else if (filename.EndsWith(".pdf"))
+                {
+                    item.Header = CustomizeTreeViewItem(filename, "/Icons/pdf.png");
                 }
                 else
                 {
@@ -342,49 +359,141 @@ namespace CreateIDE
                         subitem.Tag = s;
                         subitem.FontWeight = FontWeights.Normal;
                         subitem.Expanded += new RoutedEventHandler(folder_Expanded);
+                        subitem.MouseRightButtonUp += FileViewElementRightClicked;
                         item.Items.Add(subitem);
                     }
                 }
                 catch (Exception) { }
             }
         }
-    }
 
-    // The class for the autocompletion items
-    public class CompletionData : ICompletionData
-    {
-        public CompletionData(string text, string description)
+        // Context Menu Commands
+
+        private void CopyFullPath(object sender, RoutedEventArgs e)
         {
-            Text = text;
-            DescriptionText = description;
+            TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+            Clipboard.Clear();
+            Clipboard.SetText(SelectedItem.Tag.ToString());
         }
 
-        public System.Windows.Media.ImageSource Image
+        private void RenameFile(object sender, RoutedEventArgs e)
         {
-            get { return null; }
+            TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+            string newName = "";
+            FileInfo fileInfo = new FileInfo(SelectedItem.Tag.ToString());
+            if (Dialogs.InputBox("Rename", "New name", fileInfo.Name, ref newName) == System.Windows.Forms.DialogResult.OK)
+            {
+                fileInfo.MoveTo(Path.Combine(fileInfo.Directory.FullName, newName));
+                CreateFileView();
+            }
         }
 
-        public string Text { get; private set; }
-        public string DescriptionText { get; private set; }
-
-        // Use this property if you want to show a fancy UIElement in the list.
-        public object Content
+        private void DeleteFile(object sender, RoutedEventArgs e)
         {
-            get { return this.Text; }
+            TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+            FileInfo fileInfo = new FileInfo(SelectedItem.Tag.ToString());
+            if (MessageBox.Show($"'{fileInfo.Name}' will be deleted permanantly.", "Delete", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.OK)
+            {
+                File.Delete(SelectedItem.Tag.ToString());
+                CreateFileView();
+            }
         }
 
-        public object Description
+        private void CopyFiles(object sender, RoutedEventArgs e)
         {
-            get { return "" + DescriptionText; }
+            TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+            StringCollection paths = new StringCollection();
+            paths.Add(SelectedItem.Tag.ToString());
+            Clipboard.SetFileDropList(paths);
         }
 
-        public void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
+        private void PasteFiles(object sender, RoutedEventArgs e)
         {
-            textArea.Document.Replace(completionSegment, Text);
+            TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+            
         }
-        public double Priority
+
+        // The class for the autocompletion items
+        public class CompletionData : ICompletionData
         {
-            get { return 1; }
+            public CompletionData(string text, string description)
+            {
+                Text = text;
+                DescriptionText = description;
+            }
+
+            public System.Windows.Media.ImageSource Image
+            {
+                get { return null; }
+            }
+
+            public string Text { get; private set; }
+            public string DescriptionText { get; private set; }
+
+            // Use this property if you want to show a fancy UIElement in the list.
+            public object Content
+            {
+                get { return this.Text; }
+            }
+
+            public object Description
+            {
+                get { return "" + DescriptionText; }
+            }
+
+            public void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
+            {
+                textArea.Document.Replace(completionSegment, Text);
+            }
+            public double Priority
+            {
+                get { return 1; }
+            }
+        }
+
+        public class Dialogs
+        {
+            public static DialogResult InputBox(string title, string promptText, string defaultvalue, ref string value)
+            {
+                Form form = new Form();
+                System.Windows.Forms.Label label = new System.Windows.Forms.Label();
+                System.Windows.Forms.TextBox textBox = new System.Windows.Forms.TextBox();
+                System.Windows.Forms.Button buttonOk = new System.Windows.Forms.Button();
+                System.Windows.Forms.Button buttonCancel = new System.Windows.Forms.Button();
+
+                form.Text = title;
+                label.Text = promptText;
+                textBox.Text = defaultvalue;
+
+                buttonOk.Text = "OK";
+                buttonCancel.Text = "Cancel";
+                buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
+                buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+
+                label.SetBounds(9, 20, 372, 13);
+                textBox.SetBounds(12, 36, 372, 20);
+                buttonOk.SetBounds(228, 72, 75, 23);
+                buttonCancel.SetBounds(309, 72, 75, 23);
+
+                label.AutoSize = true;
+                textBox.Anchor = textBox.Anchor | AnchorStyles.Right;
+                buttonOk.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+                buttonCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+
+                form.ClientSize = new Size(396, 107);
+                form.Controls.AddRange(new System.Windows.Forms.Control[] { label, textBox, buttonOk, buttonCancel });
+                form.ClientSize = new Size(Math.Max(300, label.Right + 10), form.ClientSize.Height);
+                form.FormBorderStyle = FormBorderStyle.FixedDialog;
+                form.StartPosition = FormStartPosition.CenterScreen;
+                form.MinimizeBox = false;
+                form.MaximizeBox = false;
+                form.AcceptButton = buttonOk;
+                form.CancelButton = buttonCancel;
+
+                DialogResult dialogResult = form.ShowDialog();
+                value = textBox.Text;
+                return dialogResult;
+            }
         }
     }
 }
