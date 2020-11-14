@@ -29,11 +29,14 @@ using Clipboard = System.Windows.Clipboard;
 using Orientation = System.Windows.Controls.Orientation;
 using MessageBox = System.Windows.Forms.MessageBox;
 using System.Collections.Specialized;
+<<<<<<< HEAD
 using System.Threading;
 using System.Runtime.CompilerServices;
 using Application = System.Windows.Application;
 using System.Diagnostics.CodeAnalysis;
 using TabControl = System.Windows.Controls.TabControl;
+=======
+>>>>>>> parent of 90aec28... Before Tabs
 
 namespace CreateIDE
 {
@@ -48,7 +51,7 @@ namespace CreateIDE
         CompletionWindow completionWindow;
         IList<ICompletionData> completionListData;
         IO_Handler ioHandler;
-        string projectName, projectVersion, projectPath, filepath, filename;
+        string projectName, projectVersion, projectPath;
         string text = "";
         Encoding encoding = Encoding.UTF8;
         private object dummyNode = null;
@@ -66,9 +69,12 @@ namespace CreateIDE
             // File Viewer
             CreateFileView();
             fileViewer.ContextMenuClosing += fileViewerContextMenuClosing;
+<<<<<<< HEAD
             // Create Tab System
             CreateTabs();
 
+=======
+>>>>>>> parent of 90aec28... Before Tabs
         }
         // Tab System
         private void CreateTabs()
@@ -193,7 +199,7 @@ namespace CreateIDE
             completionListData.Add(new CompletionData("using", "using keyword"));
         }
 
-        // The following methods have to do with the file menu
+
         private void OpenProject(object sender, RoutedEventArgs e)
         {
             OpenProject();
@@ -221,20 +227,6 @@ namespace CreateIDE
             }
             CreateFileView();
             this.Title = $"{projectName} - CreateIDE";
-        }
-
-        private void SaveFile(object sender, RoutedEventArgs e)
-        {
-            SaveFile();
-        } // Just calls the overload
-
-        private void SaveFile(bool executedFromCode = false)
-        {
-            if (filepath != null && !executedFromCode)
-            {
-                filename = Path.GetFileName(filepath);
-                File.WriteAllText(filepath, textEditor.Text);
-            }
         }
 
 
@@ -286,34 +278,9 @@ namespace CreateIDE
                 item.FontWeight = FontWeights.Normal;
                 item.Expanded += new RoutedEventHandler(folder_Expanded);
                 item.MouseRightButtonUp += FileViewElementRightClicked;
-                item.MouseDoubleClick += FileViewElementDoubleClick;
                 fileViewer.Items.Add(item);
             }
         }
-
-        private void FileViewElementDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            TreeViewItem senderItem = sender as TreeViewItem;
-
-            if (senderItem.IsSelected)
-            {
-                if (filepath == null || File.ReadAllText(filepath) == textEditor.Text)
-                {
-                    filepath = senderItem.Tag.ToString();
-                    filename = Path.GetFileName(filepath);
-                    textEditor.Text = File.ReadAllText(senderItem.Tag.ToString());
-                } else
-                {
-                    SaveFile();
-                }
-            }
-        }
-
-        private void CreateFileView(object sender, RoutedEventArgs e)
-        {
-            CreateFileView();
-        } // Just calls the overload
-
         private void FileViewElementRightClicked(object sender, MouseButtonEventArgs e)
         {
             TreeViewItem SelectedItem = sender as TreeViewItem;
@@ -421,7 +388,6 @@ namespace CreateIDE
                         subitem.FontWeight = FontWeights.Normal;
                         subitem.Expanded += new RoutedEventHandler(folder_Expanded);
                         subitem.MouseRightButtonUp += FileViewElementRightClicked;
-                        subitem.MouseDoubleClick += FileViewElementDoubleClick;
                         item.Items.Add(subitem);
                     }
                 }
@@ -430,39 +396,6 @@ namespace CreateIDE
         }
 
         // Context Menu Commands
-
-        private void AddFile(object sender, RoutedEventArgs e)
-        {
-            TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
-            string tempfilename = "";
-            if (Dialogs.InputBox("Add File", "Enter the filename and extension", "Untitled.cs", ref tempfilename) == System.Windows.Forms.DialogResult.OK)
-            {
-                File.Create(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
-                CreateFileView();
-            }
-        }
-
-        private void AddFolder(object sender, RoutedEventArgs e)
-        {
-            TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
-            string tempfilename = "";
-            if (Dialogs.InputBox("Add Folder", "Enter the folder name", "New Folder", ref tempfilename) == System.Windows.Forms.DialogResult.OK)
-            {
-                if (Directory.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)))
-                {
-                    if (MessageBox.Show($"A folder with the name {tempfilename} already exists do you wish to overwrite it?", "Folder Already Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
-                    {
-                        ioHandler.DeleteDirectory(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
-                        Directory.CreateDirectory(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
-                    }
-                } 
-                else
-                {
-                    Directory.CreateDirectory(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
-                }
-                CreateFileView();
-            }
-        }
 
         private void CopyFullPath(object sender, RoutedEventArgs e)
         {
@@ -486,17 +419,10 @@ namespace CreateIDE
         private void DeleteFile(object sender, RoutedEventArgs e)
         {
             TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
-            string tempfilepath = SelectedItem.Tag.ToString();
             FileInfo fileInfo = new FileInfo(SelectedItem.Tag.ToString());
             if (MessageBox.Show($"'{fileInfo.Name}' will be deleted permanantly.", "Delete", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.OK)
             {
-                if (File.Exists(tempfilepath))
-                {
-                    File.Delete(tempfilepath);
-                } else if (Directory.Exists(tempfilepath))
-                {
-                    ioHandler.DeleteDirectory(tempfilepath);
-                }
+                File.Delete(SelectedItem.Tag.ToString());
                 CreateFileView();
             }
         }
@@ -512,21 +438,7 @@ namespace CreateIDE
         private void PasteFiles(object sender, RoutedEventArgs e)
         {
             TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
-            FileAttributes attr = File.GetAttributes(SelectedItem.Tag.ToString());
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                foreach (string filepath in Clipboard.GetFileDropList())
-                {
-                    if (File.Exists(filepath)) // So we don't get any FileNotFound exceptions if the user has moved/deleted the file
-                    {
-                        File.Copy(filepath, Path.Combine(SelectedItem.Tag.ToString(), Path.GetFileName(filepath)));
-                    } else if (Directory.Exists(filepath))
-                    {
-                        ioHandler.CopyDirectory(filepath, Path.Combine(SelectedItem.Tag.ToString(), Path.GetFileName(filepath)), true);
-                    }
-                }
-                CreateFileView();
-            }
+            
         }
 
         // The class for the autocompletion items
@@ -567,7 +479,6 @@ namespace CreateIDE
             }
         }
 
-        // A GUI Class
         public class Dialogs
         {
             public static DialogResult InputBox(string title, string promptText, string defaultvalue, ref string value)
