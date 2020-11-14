@@ -33,6 +33,7 @@ using System.Threading;
 using System.Runtime.CompilerServices;
 using Application = System.Windows.Application;
 using System.Diagnostics.CodeAnalysis;
+using TabControl = System.Windows.Controls.TabControl;
 
 namespace CreateIDE
 {
@@ -51,6 +52,7 @@ namespace CreateIDE
         string text = "";
         Encoding encoding = Encoding.UTF8;
         private object dummyNode = null;
+        TextEditor textEditor = new TextEditor();
         public MainWindow()
         {
             InitializeComponent();
@@ -64,8 +66,23 @@ namespace CreateIDE
             // File Viewer
             CreateFileView();
             fileViewer.ContextMenuClosing += fileViewerContextMenuClosing;
+            // Create Tab System
+            CreateTabs();
 
         }
+        // Tab System
+        private void CreateTabs()
+        {
+            TabControl tc = new TabControl();
+            tc.Margin = new Thickness(0, 0, 0, 0);
+            tc.Name = "DynamicTabControl";
+            tc.Items.Add("This is awesome");
+            TabItem tabItem = tc.Items[0] as TabItem;
+            tabItem.Content = textEditor;
+            
+        }
+
+        // Completion Window
 
         void textEditor_TextArea_TextEntered(object sender, TextCompositionEventArgs e)
         {
