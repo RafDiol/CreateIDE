@@ -12,7 +12,7 @@
                 <MenuItem Header="_Open Project" Click="OpenProject" />
                 <MenuItem Header="_Save Project" Click="SaveAsProject"/>
                 <Separator/>
-                <MenuItem Header="_Save File" />
+                <MenuItem Header="_Save File" Click="SaveFile"/>
                 <MenuItem Header="_Save All Files" />
                 <Separator/>
                 <MenuItem Header="_Exit" Click="Exit"/>
@@ -25,12 +25,20 @@
     FontFamily="Consolas"
     FontSize="10pt"
     Margin="0, 20, 300, 0"/>
-        <TreeView Grid.Column="2" x:Name="fileViewer" HorizontalAlignment="Right" Width="300" Margin="0, 30, 0, 0">
+        <Label HorizontalAlignment="Right" Width="300" Height="30" VerticalAlignment="Top" Content="File Explorer" VerticalContentAlignment="Center" Margin="0, 0, 0, 0"/>
+        <ToolBar HorizontalAlignment="Right" Width="300" Height="30" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="0, 30, 0, 0">
+            <Button Click="CreateFileView">
+                <Image Source="/AppIcons/refresh.png"/>
+            </Button>
+        </ToolBar>
+        <TreeView Grid.Column="2" x:Name="fileViewer" HorizontalAlignment="Right" Width="300" Margin="0, 60, 0, 0">
             <TreeView.Resources>
                 <ContextMenu x:Key ="ContextMenu"  StaysOpen="true">
-                    <MenuItem Header="Add"/>
+                    <MenuItem Header="Add">
+                        <MenuItem Header="New Item" Click="AddFile"/>
+                        <MenuItem Header="New Folder" Click="AddFolder"/>
+                    </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Cut"/>
                     <MenuItem Header="Copy" Click="CopyFiles"/>
                     <MenuItem Header="Paste" Click="PasteFiles"/>
                     <MenuItem Header="Delete" Click="DeleteFile"/>
@@ -40,6 +48,5 @@
                 </ContextMenu>
             </TreeView.Resources>
         </TreeView>
-        <Label HorizontalAlignment="Right" Width="300" Height="30" VerticalAlignment="Top" Content="File Explorer" VerticalContentAlignment="Center" Margin="0, 0, 0, 0"/>
     </Grid>
 </Window>

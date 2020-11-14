@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("appicons/refresh.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/cs.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/dll.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/img.png")]
