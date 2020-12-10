@@ -139,9 +139,13 @@ namespace CreateIDE
             StackPanel stkpanel = (StackPanel)img.Parent;
             TabItem tab = (TabItem)stkpanel.Parent;
             Console.WriteLine(tab.Tag);
-            if (File.ReadAllText(filepath) != textEditor.Text && MessageBox.Show("Do you want to save the changes made?", "Save Changes", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+            if (tab.Tag.ToString() != "welcome") // Just to prevent crushes and exceptions
             {
-                SaveFile();
+                if (File.ReadAllText(filepath) != textEditor.Text && MessageBox.Show("Do you want to save the changes made?", "Save Changes", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    // Save the file and the continue on closing the file
+                    SaveFile();
+                }
             }
             tabItems.Remove(tab);
             DynamicTab.DataContext = null;
