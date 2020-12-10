@@ -11,10 +11,56 @@
                 <MenuItem Header="_New Project" Click="NewProject"/>
                 <MenuItem Header="_Open Project" Click="OpenProject" />
                 <Separator/>
-                <MenuItem Header="_Save File" Click="SaveFile"/>
+                <MenuItem Header="_Save File" Click="SaveFile">
+                    <MenuItem.Icon>
+                        <Image Source="/Icons/SaveFileIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="_Save All Files" />
                 <Separator/>
-                <MenuItem Header="_Exit" Click="Exit"/>
+                <MenuItem Header="_Exit" Click="Exit">
+                    <MenuItem.Icon>
+                        <Image Source="/Icons/ExitIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Find"></MenuItem>
+                <MenuItem Header="Find Occurances"></MenuItem>
+                <MenuItem Header="Go To"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Undo" Click="Undo">
+                    <MenuItem.Icon>
+                        <Image Source="/Icons/UndoIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Redo" Click="Redo">
+                    <MenuItem.Icon>
+                        <Image Source="/Icons/RedoIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Select All" Click="SelectAll"></MenuItem>
+                <MenuItem Header="Copy" Click="Copy">
+                    <MenuItem.Icon>
+                        <Image Source="/Icons/CopyIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Paste" Click="Paste">
+                    <MenuItem.Icon>
+                        <Image Source="/Icons/PasteIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Cut" Click="Cut">
+                    <MenuItem.Icon>
+                        <Image Source="/Icons/CutIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Delete" Click="Delete">
+                    <MenuItem.Icon>
+                        <Image Source="/Icons/DeleteIcon.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
         </Menu>
         <TabControl Name="DynamicTab" ItemsSource="{Binding}" SelectionChanged="TabSelectionChanged" Margin="0, 20, 0, 0">

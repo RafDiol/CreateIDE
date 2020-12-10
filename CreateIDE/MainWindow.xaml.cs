@@ -579,6 +579,42 @@ namespace CreateIDE
             }
         }
 
+        // Edit Menu Commands
+        private void Undo(object sender, RoutedEventArgs e)
+        {
+            textEditor.Undo();
+        }
+
+        private void Redo(object sender, RoutedEventArgs e)
+        {
+            textEditor.Redo();
+        }
+
+        private void SelectAll(object sender, RoutedEventArgs e)
+        {
+            textEditor.SelectAll();
+        }
+
+        private void Copy(object sender, RoutedEventArgs e)
+        {
+            textEditor.Copy();
+        }
+
+        private void Paste(object sender, RoutedEventArgs e)
+        {
+            textEditor.Paste();
+        }
+
+        private void Cut(object sender, RoutedEventArgs e)
+        {
+            textEditor.Cut();
+        }
+
+        private void Delete(object sender, RoutedEventArgs e)
+        {
+            textEditor.Delete();
+        }
+
         // Context Menu Commands
 
         private void AddFile(object sender, RoutedEventArgs e)
@@ -589,10 +625,27 @@ namespace CreateIDE
             {
                 if (File.GetAttributes(SelectedItem.Tag.ToString()).HasFlag(FileAttributes.Directory))
                 {
-                    File.Create(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                    if (File.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)) && MessageBox.Show($"A file with the name '{tempfilename}' already exists do you wish to overide it?", "File Exists", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                    {
+                        // If a file with the same name exists and the user wishes to overide it do it
+                        File.Create(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                    } else
+                    {
+                        // If no file with the same name exists then create the file
+                        File.Create(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                    }
                 } else
                 {
-                    File.Create(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                    if (File.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)) && MessageBox.Show($"A file with the name '{tempfilename}' already exists do you wish to overide it?", "File Exists", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                    {
+                        // If a file with the same name exists and the user wishes to overide it do it
+                        File.Create(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                    }
+                    else
+                    {
+                        // If no file with the same name exists then create the file
+                        File.Create(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                    }
                 }
                 CreateFileView();
             }

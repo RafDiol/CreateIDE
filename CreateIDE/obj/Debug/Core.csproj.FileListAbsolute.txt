@@ -115,3 +115,13 @@ C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\ToastNotifications
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\ToastNotifications.Messages.dll
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\System.ValueTuple.xml
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\AppIcons\close.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\CopyIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\CutIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\DeleteIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\ExitIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\FontIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\PasteIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\RedoIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\SaveAsFileIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\SaveFileIcon.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\UndoIcon.png
