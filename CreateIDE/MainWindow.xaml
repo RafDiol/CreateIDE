@@ -8,17 +8,27 @@
     <Grid>
         <Menu VerticalAlignment="Top" HorizontalAlignment="Stretch" Height="20" Margin="0, 0, 300, 0">
             <MenuItem Header="_File">
-                <MenuItem Header="_New Project" />
+                <MenuItem Header="_New Project" Click="NewProject"/>
                 <MenuItem Header="_Open Project" Click="OpenProject" />
-                <MenuItem Header="_Save Project" Click="SaveAsProject"/>
                 <Separator/>
-                <MenuItem Header="_Save File" />
+                <MenuItem Header="_Save File" Click="SaveFile"/>
                 <MenuItem Header="_Save All Files" />
                 <Separator/>
                 <MenuItem Header="_Exit" Click="Exit"/>
             </MenuItem>
         </Menu>
-<<<<<<< HEAD
+        <TabControl Name="DynamicTab" ItemsSource="{Binding}" SelectionChanged="TabSelectionChanged" Margin="0, 20, 0, 0">
+            <TabControl.Resources>
+                <DataTemplate x:Key="TabHeader" DataType="TabItem">
+                    <DockPanel>
+                        <Button Name="btnDelete" DockPanel.Dock="Right" Margin="5,0,0,0" Padding="0" Click="btnDelete_Click" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type TabItem}}, Path=Name}">
+                            <Image Source="/AppIcons/close.png" Height="11" Width="11"></Image>
+                        </Button>
+                        <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type TabItem}}, Path=Header}" />
+                    </DockPanel>
+                </DataTemplate>
+            </TabControl.Resources>
+        </TabControl>
         <Label HorizontalAlignment="Right" Width="300" Height="30" VerticalAlignment="Top" Content="File Explorer" VerticalContentAlignment="Center" Margin="0, 0, 0, 0"/>
         <ToolBar HorizontalAlignment="Right" Width="300" Height="30" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="0, 30, 0, 0">
             <Button Click="CreateFileView">
@@ -26,21 +36,13 @@
             </Button>
         </ToolBar>
         <TreeView Grid.Column="2" x:Name="fileViewer" HorizontalAlignment="Right" Width="300" Margin="0, 60, 0, 0">
-=======
-        <avalonEdit:TextEditor
-    xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
-    Name="textEditor"
-    SyntaxHighlighting="C#"
-    FontFamily="Consolas"
-    FontSize="10pt"
-    Margin="0, 20, 300, 0"/>
-        <TreeView Grid.Column="2" x:Name="fileViewer" HorizontalAlignment="Right" Width="300" Margin="0, 30, 0, 0">
->>>>>>> parent of 90aec28... Before Tabs
             <TreeView.Resources>
                 <ContextMenu x:Key ="ContextMenu"  StaysOpen="true">
-                    <MenuItem Header="Add"/>
+                    <MenuItem Header="Add">
+                        <MenuItem Header="New Item" Click="AddFile"/>
+                        <MenuItem Header="New Folder" Click="AddFolder"/>
+                    </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Cut"/>
                     <MenuItem Header="Copy" Click="CopyFiles"/>
                     <MenuItem Header="Paste" Click="PasteFiles"/>
                     <MenuItem Header="Delete" Click="DeleteFile"/>
@@ -50,6 +52,5 @@
                 </ContextMenu>
             </TreeView.Resources>
         </TreeView>
-        <Label HorizontalAlignment="Right" Width="300" Height="30" VerticalAlignment="Top" Content="File Explorer" VerticalContentAlignment="Center" Margin="0, 0, 0, 0"/>
     </Grid>
 </Window>

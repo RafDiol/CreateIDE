@@ -18,7 +18,72 @@ namespace CreateIDE
 {
     class IO_Handler
     {
-        public void OpenProject(Encoding encoding, out string projectPath, out string projectName, out string version)
+        public void CopyDirectory(string sourceDirName, string destDirName, bool copySubDirs)
+        {
+            // Get the subdirectories for the specified directory.
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // If the destination directory doesn't exist, create it.       
+            Directory.CreateDirectory(destDirName);
+
+            // Get the files in the directory and copy them to the new location.
+            FileInfo[] files = dir.GetFiles();
+            string filePath = "";
+            foreach (FileInfo file in files)
+            {
+                try
+                {
+                    filePath = Path.Combine(destDirName, file.Name);
+                    file.CopyTo(filePath, false);
+                } catch (System.IO.IOException)
+                {
+                    if (System.IO.Directory.Exists(filePath))
+                    {
+                        DeleteDirectory(filePath);
+                        CopyDirectory(sourceDirName, destDirName, true);
+                    }
+                }
+            }
+
+            // If copying subdirectories, copy them and their contents to new location.
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dirs)
+                {
+                    string tempPath = Path.Combine(destDirName, subdir.Name);
+                    CopyDirectory(subdir.FullName, tempPath, copySubDirs);
+                }
+            }
+        }
+        public void DeleteDirectory(string target_dir)
+        {
+            string[] files = Directory.GetFiles(target_dir);
+            string[] dirs = Directory.GetDirectories(target_dir);
+
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                DeleteDirectory(dir);
+            }
+
+            Directory.Delete(target_dir, false);
+        }
+
+        public void OpenProject(Encoding encoding, out string projectPath, out string projectFolderPath, out string projectName, out string version)
         {
             try
             {
@@ -30,7 +95,8 @@ namespace CreateIDE
                 fd.Filter = "Project Creation (*.prj)|*.prj";
                 if (fd.ShowDialog() == DialogResult.OK) // Successfully selected a file
                 {
-                    projectPath = Path.GetDirectoryName(fd.FileName);
+                    projectPath = fd.FileName;
+                    projectFolderPath = System.IO.Path.GetDirectoryName(projectPath);
                     text = File.ReadAllText(fd.FileName, encoding);
                     data = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
                     version = data[0];
@@ -46,7 +112,7 @@ namespace CreateIDE
             }
         }
 
-        public void SaveAsProject(string version ,out string projectPath, out string projectName)
+        public void NewProject(string version ,out string projectPath, out string projectFolderPath ,out string projectName)
         {
             SaveFileDialog fd = new SaveFileDialog();
             fd.FilterIndex = 1;
@@ -55,6 +121,7 @@ namespace CreateIDE
             {
                 // Create some basic variables neededlater down the line
                 projectPath = fd.FileName;
+                projectFolderPath = System.IO.Path.GetDirectoryName(projectPath);
                 projectName = System.IO.Path.GetFileName(projectPath);
                 // Now lets save this project
                 File.WriteAllText(projectPath, $"{version}{Environment.NewLine}{projectName}");
