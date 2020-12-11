@@ -172,7 +172,22 @@ namespace CreateIDE
             TabItem tempTabItem = (TabItem)DynamicTab.SelectedItem;
             if (tempTabItem != null && tempTabItem.Tag.ToString() != "welcome")
             {
+                filepath = tempTabItem.Tag.ToString();
+                filename = Path.GetFileName(filepath);
                 textEditor = (TextEditor)tempTabItem.Content;
+            }
+            if (filename != null && textEditor != null) // If i remove this line i will get an error on initialization
+            {
+                if (filename.EndsWith(".cs"))
+                {
+                    isAutocompleteActive = true;
+                    textEditor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinition("C#");
+                }
+                else
+                {
+                    isAutocompleteActive = false;
+                    textEditor.SyntaxHighlighting = null;
+                }
             }
         }
 
@@ -217,6 +232,14 @@ namespace CreateIDE
 
         void textEditor_TextArea_TextEntered(object sender, TextCompositionEventArgs e)
         {
+            // Autoclose Brackets, parentheses etc...
+            if (isAutocompleteActive)
+            {
+                if (e.Text == "(") { textEditor.AppendText(")"); }
+                if (e.Text == "[") { textEditor.AppendText("]"); }
+                if (e.Text == "{") { textEditor.AppendText("}"); }
+                textEditor.TextArea.Caret.Offset--; // Go back the caret by one so the caret is placed inside the parenthesis
+            }
             if (e.Text == "." || e.Text == ";" || e.Text == "(" || e.Text == "{" || e.Text == " ")
             {
                 if (isAutocompleteActive)
@@ -447,15 +470,6 @@ namespace CreateIDE
                 filepath = senderItem.Tag.ToString();
                 filename = Path.GetFileName(filepath);
                 textEditor.Text = File.ReadAllText(filepath);
-                if (filename.EndsWith(".cs"))
-                {
-                    isAutocompleteActive = true;
-                    textEditor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinition("C#");
-                } else
-                {
-                    isAutocompleteActive = false;
-                    textEditor.SyntaxHighlighting = null;
-                }
             }
         }
 
@@ -657,24 +671,35 @@ namespace CreateIDE
             string tempfilename = "";
             if (Dialogs.InputBox("Add Folder", "Enter the folder name", "New Folder", ref tempfilename) == System.Windows.Forms.DialogResult.OK)
             {
-                if (Directory.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)))
-                {
-                    if (MessageBox.Show($"A folder with the name {tempfilename} already exists do you wish to overwrite it?", "Folder Already Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
+                if (File.GetAttributes(SelectedItem.Tag.ToString()).HasFlag(FileAttributes.Directory))
+                 {
+                    if (Directory.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)))
                     {
-                        ioHandler.DeleteDirectory(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                        if (MessageBox.Show($"A folder with the name {tempfilename} already exists do you wish to overwrite it?", "Folder Already Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
+                        {
+                            ioHandler.DeleteDirectory(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                            Directory.CreateDirectory(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                        }
+                    }
+                    else
+                    {
                         Directory.CreateDirectory(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
                     }
-                } 
+                 } 
                 else
-                {
-                    if (File.GetAttributes(SelectedItem.Tag.ToString()).HasFlag(FileAttributes.Directory))
+                 {
+                    if (Directory.Exists(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename)))
                     {
-                        Directory.CreateDirectory(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                        if (MessageBox.Show($"A folder with the name {tempfilename} already exists do you wish to overwrite it?", "Folder Already Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
+                        {
+                            ioHandler.DeleteDirectory(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                            Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                        }
                     } else
                     {
                         Directory.CreateDirectory(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
                     }
-                }
+                 }
                 CreateFileView();
             }
         }
