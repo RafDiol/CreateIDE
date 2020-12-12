@@ -83,7 +83,7 @@ namespace CreateIDE
             Directory.Delete(target_dir, false);
         }
 
-        public void OpenProject(Encoding encoding, out string projectPath, out string projectFolderPath, out string projectName, out string version)
+        public void OpenProject(Encoding encoding, out string projectPath, out string projectFolderPath, out string projectName, out string version, out string startMethod)
         {
             try
             {
@@ -101,6 +101,7 @@ namespace CreateIDE
                     data = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
                     version = data[0];
                     projectName = data[1];
+                    startMethod = data[2];
                 }
                 else
                 {
@@ -112,7 +113,7 @@ namespace CreateIDE
             }
         }
 
-        public void NewProject(string version ,out string projectPath, out string projectFolderPath ,out string projectName)
+        public void NewProject(string version, string startMethod ,out string projectPath, out string projectFolderPath ,out string projectName)
         {
             SaveFileDialog fd = new SaveFileDialog();
             fd.FilterIndex = 1;
@@ -124,7 +125,7 @@ namespace CreateIDE
                 projectFolderPath = System.IO.Path.GetDirectoryName(projectPath);
                 projectName = System.IO.Path.GetFileName(projectPath);
                 // Now lets save this project
-                File.WriteAllText(projectPath, $"{version}{Environment.NewLine}{projectName}");
+                File.WriteAllText(projectPath, $"{version}{Environment.NewLine}{projectName}{Environment.NewLine}{startMethod}");
             }
             else
             {

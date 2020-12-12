@@ -62,6 +62,10 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
+            <MenuItem Header="Run">
+                <MenuItem Header="Run" Click="RunApp"/>
+                <MenuItem Header="Configure Run Settings"/>
+            </MenuItem>
         </Menu>
         <TabControl Name="DynamicTab" ItemsSource="{Binding}" SelectionChanged="TabSelectionChanged" Margin="0, 20, 0, 0">
             <TabControl.Resources>

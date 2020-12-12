@@ -35,6 +35,7 @@ using Application = System.Windows.Application;
 using System.Diagnostics.CodeAnalysis;
 using TextBox = System.Windows.Forms.TextBox;
 using Button = System.Windows.Controls.Button;
+using YourIDE;
 
 namespace CreateIDE
 {
@@ -49,6 +50,7 @@ namespace CreateIDE
         CompletionWindow completionWindow;
         IList<ICompletionData> completionListData;
         IO_Handler ioHandler;
+        Compiler compiler;
         string projectName, projectVersion, projectPath, projectFolderPath, filepath, filename;
         string text = "";
         Encoding encoding = Encoding.UTF8;
@@ -56,12 +58,19 @@ namespace CreateIDE
         bool isAutocompleteActive = false;
         private List<TabItem> tabItems;
         private TextEditor textEditor = null;
+        // Compiler Settings
+        // The default references
+        string[] references = { "System", "System.Collections.Generic", "System.Linq", "System.Text", "System.IO" };
+        int WarningLvl = 3;
+        bool TreatWarningsAsErrors = false, IncludeDebugInfo = true;
+        string compilerOptions = "", startMethod;
 
         public MainWindow()
         {
             InitializeComponent();
             // Initialize some components
             ioHandler = new IO_Handler();
+            compiler = new Compiler();
             // Create Tab Layout
             CreateTabMenu();
             // File Viewer
@@ -240,6 +249,7 @@ namespace CreateIDE
                 if (e.Text == "{") { textEditor.AppendText("}"); }
                 textEditor.TextArea.Caret.Offset--; // Go back the caret by one so the caret is placed inside the parenthesis
             }
+            // When to open the autocompletion window
             if (e.Text == "." || e.Text == ";" || e.Text == "(" || e.Text == "{" || e.Text == " ")
             {
                 if (isAutocompleteActive)
@@ -359,7 +369,7 @@ namespace CreateIDE
         {
             try
             {
-                ioHandler.OpenProject(encoding, out projectPath, out projectFolderPath, out projectName, out projectVersion);
+                ioHandler.OpenProject(encoding, out projectPath, out projectFolderPath, out projectName, out projectVersion, out startMethod);
             }
             catch (IOException)
             {
@@ -402,7 +412,7 @@ namespace CreateIDE
         {
             try
             {
-                ioHandler.NewProject(VERSION, out projectPath, out projectFolderPath, out projectName);
+                ioHandler.NewProject(VERSION, startMethod, out projectPath, out projectFolderPath, out projectName);
             }
             catch (IOException)
             {
@@ -767,6 +777,12 @@ namespace CreateIDE
                 }
                 CreateFileView();
             }
+        }
+        
+        // This method compiles the app and runs it
+        private void Run(object sender, RoutedEventArgs e)
+        {
+            compiler.Compile(Path.Combine(projectFolderPath, "bin"), projectFolderPath, references, projectName.Split('.')[0]+".exe", WarningLvl);
         }
 
         // The class for the autocompletion items
