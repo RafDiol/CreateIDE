@@ -1,0 +1,43 @@
+﻿<Window x:Class="CreateIDE.RunConfig"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CreateIDE"
+        mc:Ignorable="d"
+        Title="Run Settings" Height="500" Width="450" ResizeMode="NoResize">
+    <Grid>
+        <ScrollViewer>
+            <StackPanel>
+                <Label Content="Type of output"/>
+                <ComboBox x:Name="outputTypeComboBox" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Margin="0, 0, 0, 0">
+                    <ComboBoxItem Content="EXE"/>
+                    <ComboBoxItem Content="DLL"/>
+                </ComboBox>
+                <Button Click="ChangeSourceFile" VerticalAlignment="Top" HorizontalAlignment="Left" Width="150" Margin="0, 10, 0, 0" Content="Change Source File" ToolTip="The startup object"/>
+                <Label VerticalAlignment="Top" Height="20" HorizontalAlignment="Left" Width="150" Margin="0, 10, 0, 0"/>
+                <CheckBox x:Name="autoRunCheckBox" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0, 20, 0, 0" Content="Auto run after compiling (Only works for the EXE format)"/>
+                <Label VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0, 30, 0, 0" Content="References"/>
+                <!-- The Reference Layout -->
+                <ListBox x:Name="refListBox" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="150" Margin="0, 10, 0, 0">
+
+                </ListBox>
+                <Button Content="Add" Click="AddRef" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="25" Margin="200, -105, 0, 0"/>
+                <Button Content="Remove" Click="RemoveRef" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="25" Margin="200, -75, 0, 0"/>
+                <Label VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="25" Margin="0, 10, 0, 0" Content="Start Method" ToolTip="The function to execute on start up"/>
+                <TextBox x:Name="startMethodTxtBox" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="25" Margin="0, 10, 0, 0" />
+                <Label VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="25" Margin="0, 15, 0, 0" Content="Warning Level" />
+                <ComboBox x:Name="warningLvlComboBox" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="25" Margin="0, 25, 0, 0">
+                    <ComboBoxItem Content="1"/>
+                    <ComboBoxItem Content="2"/>
+                    <ComboBoxItem Content="3"/>
+                    <ComboBoxItem Content="4"/>
+                    <ComboBoxItem Content="5"/>
+                </ComboBox>
+                <CheckBox x:Name="treatWarningsAsErrorsCheckbox" Content="Treat Warnings As Errors" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="25" Margin="0, 30, 0, 0" />
+                <CheckBox x:Name="inculdeDebugInfo" Content="Include Debug Info" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="25" Margin="0, 30, 0, 0" />
+                <Button VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Height="35" Content="Apply" Click="Apply"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

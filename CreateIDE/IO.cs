@@ -126,6 +126,7 @@ namespace CreateIDE
                 projectName = System.IO.Path.GetFileName(projectPath);
                 // Now lets save this project
                 File.WriteAllText(projectPath, $"{version}{Environment.NewLine}{projectName}{Environment.NewLine}{startMethod}");
+                Directory.CreateDirectory(Path.Combine(projectPath, "bin"));
             }
             else
             {

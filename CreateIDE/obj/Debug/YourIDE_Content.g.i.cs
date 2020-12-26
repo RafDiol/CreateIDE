@@ -15,6 +15,7 @@
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/cuticon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/deleteicon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/dll.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/exe.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/exiticon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/fonticon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/img.png")]

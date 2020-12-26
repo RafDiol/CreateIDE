@@ -237,3 +237,7 @@ C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\ru\Microsoft.CodeA
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\exe.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\obj\Debug\RunConfig.g.cs
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\obj\Debug\YourIDE_MarkupCompile.lref
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\obj\Debug\RunConfig.baml

@@ -63,8 +63,8 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Run">
-                <MenuItem Header="Run" Click="RunApp"/>
-                <MenuItem Header="Configure Run Settings"/>
+                <MenuItem Header="Run" Click="Run"/>
+                <MenuItem Header="Configure Run Settings" Click="ConfigRunSettings"/>
             </MenuItem>
         </Menu>
         <TabControl Name="DynamicTab" ItemsSource="{Binding}" SelectionChanged="TabSelectionChanged" Margin="0, 20, 0, 0">

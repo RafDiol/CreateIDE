@@ -46,6 +46,11 @@ namespace CreateIDE
     {
         // Constants
         const string VERSION = "1.0.0";
+        public enum CompileOption 
+        {
+            EXE = 0,
+            DLL = 1
+        }
 
         CompletionWindow completionWindow;
         IList<ICompletionData> completionListData;
@@ -58,12 +63,18 @@ namespace CreateIDE
         bool isAutocompleteActive = false;
         private List<TabItem> tabItems;
         private TextEditor textEditor = null;
-        // Compiler Settings
+        // Compiler Parameters
+        /*
+         * The Compiler parameters are static because they need to be referenced by the RunConfig.cs file without
+         * the instantiation of the MainWindow object.
+         */
+
         // The default references
-        string[] references = { "System", "System.Collections.Generic", "System.Linq", "System.Text", "System.IO" };
-        int WarningLvl = 3;
-        bool TreatWarningsAsErrors = false, IncludeDebugInfo = true;
-        string compilerOptions = "", startMethod;
+        public static string[] references = { "System", "System.Linq", "System.IO" };
+        public static int WarningLvl = 3;
+        public static bool TreatWarningsAsErrors = false, IncludeDebugInfo = true, autoRunExe = true;
+        public static string compilerOptions = "", startMethod, sourceFile;
+        public static CompileOption CompOpt = CompileOption.EXE;
 
         public MainWindow()
         {
@@ -237,17 +248,16 @@ namespace CreateIDE
             }
         }
 
-        // Autocomplete Methods
+        // Auto-complete Methods
 
         void textEditor_TextArea_TextEntered(object sender, TextCompositionEventArgs e)
         {
             // Autoclose Brackets, parentheses etc...
             if (isAutocompleteActive)
             {
-                if (e.Text == "(") { textEditor.AppendText(")"); }
-                if (e.Text == "[") { textEditor.AppendText("]"); }
-                if (e.Text == "{") { textEditor.AppendText("}"); }
-                textEditor.TextArea.Caret.Offset--; // Go back the caret by one so the caret is placed inside the parenthesis
+                if (e.Text == "(") { textEditor.Document.Insert(textEditor.TextArea.Caret.Offset, ")"); textEditor.TextArea.Caret.Offset--; }
+                if (e.Text == "[") { textEditor.Document.Insert(textEditor.TextArea.Caret.Offset, "]"); textEditor.TextArea.Caret.Offset--; }
+                if (e.Text == "{") { textEditor.Document.Insert(textEditor.TextArea.Caret.Offset ,"}"); textEditor.TextArea.Caret.Offset--; }
             }
             // When to open the autocompletion window
             if (e.Text == "." || e.Text == ";" || e.Text == "(" || e.Text == "{" || e.Text == " ")
@@ -549,6 +559,10 @@ namespace CreateIDE
                 else if (tempfilename.EndsWith(".pdf"))
                 {
                     item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/pdf.png");
+                } 
+                else if (tempfilename.EndsWith(".exe"))
+                {
+                    item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/exe.png");
                 }
                 else
                 {
@@ -782,10 +796,51 @@ namespace CreateIDE
         // This method compiles the app and runs it
         private void Run(object sender, RoutedEventArgs e)
         {
-            compiler.Compile(Path.Combine(projectFolderPath, "bin"), projectFolderPath, references, projectName.Split('.')[0]+".exe", WarningLvl);
+            if (sourceFile == null)
+            {
+                OpenFileDialog fd = new OpenFileDialog();
+                fd.FilterIndex = 1;
+                fd.Multiselect = false;
+                fd.Filter = "C# File(*.cs)|*.cs | All Files (*.*)|*.*";
+                if (fd.ShowDialog() == System.Windows.Forms.DialogResult.OK) // Successfully selected a file
+                {
+                    projectPath = fd.FileName;
+                    projectFolderPath = System.IO.Path.GetDirectoryName(projectPath);
+                    text = File.ReadAllText(fd.FileName, encoding);
+                    sourceFile = Path.Combine(projectFolderPath, fd.FileName);
+                } else
+                {
+                    return;
+                }
+            }
+            if (CompOpt == CompileOption.EXE)
+            {
+                // Compile
+                compiler.CompileToExe(Path.Combine(projectFolderPath, "bin"), projectFolderPath, references, projectName.Split('.')[0], sourceFile,
+                    WarningLvl, TreatWarningsAsErrors, compilerOptions, IncludeDebugInfo, startMethod);
+            } else
+            {
+                compiler.CompileToDLL(Path.Combine(projectFolderPath, "bin"), projectFolderPath, references, projectName.Split('.')[0], sourceFile,
+                    WarningLvl, TreatWarningsAsErrors, compilerOptions, IncludeDebugInfo);
+            }
+            // Refresh the File View Window
+            CreateFileView();
         }
 
-        // The class for the autocompletion items
+        private void ConfigRunSettings(object sender, RoutedEventArgs e)
+        {
+            ConfigRunSettings();
+        } // Just Calls the overload
+
+        private void ConfigRunSettings()
+        {
+            RunConfig window = new RunConfig();
+            window.supplyArgs(references, sourceFile,
+                    WarningLvl, TreatWarningsAsErrors, compilerOptions, IncludeDebugInfo, startMethod);
+            window.Show();
+        }
+
+        // The class for the auto-completion items
         public class CompletionData : ICompletionData
         {
             public CompletionData(string text, string description)

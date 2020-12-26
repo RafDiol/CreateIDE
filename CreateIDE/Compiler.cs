@@ -15,8 +15,8 @@ namespace YourIDE
 {
     class Compiler
     {
-        static public void Compile(string outputPath, string projectPath ,string[] references,
-            string filename, int WarningLevel, bool TreatWarningsAsErrors, string compilerOptions, bool IncludeDebugInfo,
+        public void CompileToExe(string outputPath, string projectPath ,string[] references,
+            string outfilename, string sourceFile, int WarningLevel, bool TreatWarningsAsErrors, string compilerOptions, bool IncludeDebugInfo,
             string startMethod)
         {
             CSharpCodeProvider provider = new CSharpCodeProvider();
@@ -27,7 +27,7 @@ namespace YourIDE
             cp.GenerateExecutable = true;
 
             // Set the assembly file name to generate.
-            cp.OutputAssembly = Path.Combine(outputPath, filename);
+            cp.OutputAssembly = Path.Combine(outputPath, outfilename+".exe");
 
             // Generate debug information.
             cp.IncludeDebugInformation = IncludeDebugInfo;
@@ -55,7 +55,7 @@ namespace YourIDE
             // The TempFileCollection stores the temporary files
             // generated during a build in the current directory,
             // and does not delete them after compilation.
-            cp.TempFiles = new TempFileCollection(outputPath, true);
+            cp.TempFiles = new TempFileCollection(".", false);
 
             if (provider.Supports(GeneratorSupport.EntryPointMethod))
             {
@@ -80,8 +80,13 @@ namespace YourIDE
                 }
             }
 
+            if (!Directory.Exists(outputPath))
+            {
+                Directory.CreateDirectory(outputPath);
+            }
+
             // Invoke compilation.
-            CompilerResults cr = provider.CompileAssemblyFromFile(cp, projectPath);
+            CompilerResults cr = provider.CompileAssemblyFromFile(cp, sourceFile);
 
             if (cr.Errors.Count > 0)
             {
@@ -98,8 +103,72 @@ namespace YourIDE
             {
                 Console.WriteLine("Source {0} built into {1} successfully.",
                     projectPath, cr.PathToAssembly);
-                Console.WriteLine("{0} temporary files created during the compilation.",
-                    cp.TempFiles.Count.ToString());
+            }
+        }
+
+        public void CompileToDLL(string outputPath, string projectPath, string[] references,
+            string outfilename, string sourceFile, int WarningLevel, bool TreatWarningsAsErrors, string compilerOptions, bool IncludeDebugInfo)
+        {
+            CSharpCodeProvider provider = new CSharpCodeProvider();
+            CompilerParameters cp = new CompilerParameters();
+
+            // Generate a class library or more commonly known as DLL.
+            cp.GenerateExecutable = false;
+
+            // Set the assembly file name to generate.
+            cp.OutputAssembly = Path.Combine(outputPath, outfilename+".dll");
+
+            // Generate debug information.
+            cp.IncludeDebugInformation = IncludeDebugInfo;
+
+            // Add all the assembly references.
+            foreach (string item in references)
+            {
+                cp.ReferencedAssemblies.Add(item + ".dll");
+            }
+
+            // Save the assembly as a physical file.
+            cp.GenerateInMemory = false;
+
+            // Set the level at which the compiler
+            // should start displaying warnings.
+            cp.WarningLevel = WarningLevel;
+
+            // Set whether to treat all warnings as errors.
+            cp.TreatWarningsAsErrors = TreatWarningsAsErrors;
+
+            // Set compiler argument to optimize output.
+            cp.CompilerOptions = compilerOptions;
+
+            // Set a temporary files collection.
+            // The TempFileCollection stores the temporary files
+            // generated during a build in the current directory,
+            // and does not delete them after compilation.
+            cp.TempFiles = new TempFileCollection(".", false);
+
+            if (!Directory.Exists(outputPath))
+            {
+                Directory.CreateDirectory(outputPath);
+            }
+
+            // Invoke compilation.
+            CompilerResults cr = provider.CompileAssemblyFromFile(cp, sourceFile);
+
+            if (cr.Errors.Count > 0)
+            {
+                // Display compilation errors.
+                Console.WriteLine("Errors building {0} into {1}",
+                    projectPath, cr.PathToAssembly);
+                foreach (CompilerError ce in cr.Errors)
+                {
+                    Console.WriteLine("  {0}", ce.ToString());
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Source {0} built into {1} successfully.",
+                    projectPath, cr.PathToAssembly);
             }
         }
     }
