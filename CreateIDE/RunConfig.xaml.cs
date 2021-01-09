@@ -16,7 +16,7 @@ using System.Windows.Forms;
 using CreateIDE;
 using CompileOption = CreateIDE.MainWindow.CompileOption;
 using Dialogs = CreateIDE.MainWindow.Dialogs;
-using MainWindow = CreateIDE.MainWindow;
+using Settings = YourIDE.Properties.Settings;
 
 namespace CreateIDE
 {
@@ -39,23 +39,28 @@ namespace CreateIDE
 
         // This method assigns the default or last used values to our GUI components
         public void supplyArgs(string[] references, string sourceFile, int WarningLevel, bool TreatWarningsAsErrors, string compilerOptions, bool IncludeDebugInfo,
-            string startMethod)
+            string startMethod, CompileOption compileOption, bool autoRun)
         {
             // References
+            refListBox.Items.Clear();
             for (int i = 0; i < references.Count(); i++)
             {
-                // Add a reference if necessary
-                if (!refListBox.Items.Contains(references[i]))
-                {
-                    refListBox.Items.Add((MainWindow.references[i]));
-                    Console.WriteLine(MainWindow.references[i]);
-                }
+                refListBox.Items.Add(references[i]);
             }
 
             this.sourceFile = sourceFile;
 
-            // Need to subtract one since we need to start counting from 0
-            warningLvlComboBox.SelectedIndex = WarningLevel--;
+            warningLvlComboBox.SelectedIndex = WarningLevel;
+
+            outputTypeComboBox.SelectedIndex = (int)compileOption;
+
+            autoRunCheckBox.IsChecked = autoRun;
+
+            startMethodTxtBox.Text = startMethod;
+
+            treatWarningsAsErrorsCheckbox.IsChecked = TreatWarningsAsErrors;
+
+            inculdeDebugInfoCheckbox.IsChecked = IncludeDebugInfo;
         }
 
         private void ChangeSourceFile(object sender, RoutedEventArgs e) 
@@ -97,14 +102,14 @@ namespace CreateIDE
              */
 
             // Compiler Output Option
-            MainWindow.CompOpt = (MainWindow.CompileOption)outputTypeComboBox.SelectedIndex;
+            Settings.Default.compileOption = outputTypeComboBox.SelectedIndex;
             
             // Source File
-            MainWindow.sourceFile = sourceFile;
+            Settings.Default.sourceFile = sourceFile;
 
             // Auto-run the executable (only works for the .exe file type)
-            // Need to cast bool? to bool
-            MainWindow.autoRunExe = (bool)autoRunCheckBox.IsChecked;
+            // Need to cast from nullable bool (bool?) to bool
+            Settings.Default.autoRun = (bool)autoRunCheckBox.IsChecked;
 
             // References
             /*
@@ -114,26 +119,26 @@ namespace CreateIDE
             */
             for (int i=0; i < refListBox.Items.Count - 1; i++)
             {
-                // Add a reference if necessary
-                if (!MainWindow.references.Contains(refListBox.Items[i]))
-                {
-                    MainWindow.references.Append((MainWindow.references[i]));
-                }
+                Console.WriteLine("Saved " + i);
+                Settings.Default.references.Add(refListBox.Items[i].ToString());
             }
 
             // Start Method
-            MainWindow.startMethod = startMethodTxtBox.Text;
+            Settings.Default.startMethod = startMethodTxtBox.Text;
 
             // Warning Level
-            MainWindow.WarningLvl = int.Parse(warningLvlComboBox.SelectedItem.ToString());
+            Settings.Default.warningLvl = warningLvlComboBox.SelectedIndex;
 
             // Treat Warnings as Errors
             // Need to cast bool? to bool
-            MainWindow.TreatWarningsAsErrors = (bool)treatWarningsAsErrorsCheckbox.IsChecked;
+            Settings.Default.treatWarningsAsErrors = (bool)treatWarningsAsErrorsCheckbox.IsChecked;
 
             // Include Debug Info
             // Need to cast bool? to bool
-            MainWindow.IncludeDebugInfo = (bool)inculdeDebugInfo.IsChecked;
+            Settings.Default.includeDebugInfo = (bool)inculdeDebugInfoCheckbox.IsChecked;
+
+            // Now lets save the settings
+            Settings.Default.Save();
         }
     }
 }

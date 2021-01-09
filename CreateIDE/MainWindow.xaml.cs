@@ -46,7 +46,7 @@ namespace CreateIDE
     {
         // Constants
         const string VERSION = "1.0.0";
-        public enum CompileOption 
+        public enum CompileOption
         {
             EXE = 0,
             DLL = 1
@@ -70,11 +70,11 @@ namespace CreateIDE
          */
 
         // The default references
-        public static string[] references = { "System", "System.Linq", "System.IO" };
-        public static int WarningLvl = 3;
-        public static bool TreatWarningsAsErrors = false, IncludeDebugInfo = true, autoRunExe = true;
-        public static string compilerOptions = "", startMethod, sourceFile;
-        public static CompileOption CompOpt = CompileOption.EXE;
+        public string[] references = { "System", "System.Linq", "System.IO"};
+        public int WarningLvl = 3;
+        public bool TreatWarningsAsErrors = false, IncludeDebugInfo = true, autoRunExe = true;
+        public string compilerOptions = "", startMethod, sourceFile;
+        public CompileOption CompOpt = CompileOption.EXE;
 
         public MainWindow()
         {
@@ -158,7 +158,6 @@ namespace CreateIDE
             Image img = (Image)sender;
             StackPanel stkpanel = (StackPanel)img.Parent;
             TabItem tab = (TabItem)stkpanel.Parent;
-            Console.WriteLine(tab.Tag);
             if (tab.Tag.ToString() != "welcome") // Just to prevent crushes and exceptions
             {
                 if (File.ReadAllText(filepath) != textEditor.Text && MessageBox.Show("Do you want to save the changes made?", "Save Changes", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
@@ -171,9 +170,14 @@ namespace CreateIDE
             DynamicTab.DataContext = null;
             DynamicTab.DataContext = tabItems;
             DynamicTab.SelectedIndex = tabItems.Count - 1; // We subtract 1 because we need to start counting from index 0
+            // Add the welcome tab if no tabs are open
+            if (tabItems.Count() == 0)
+            {
+                AddWelcomeTab();
+            }
         }
 
-        private void AddWelcomeTab()
+        private void AddWelcomeTab(bool hasFocus = true)
         {
             // add a tabItem
             TabItem tabItem = new TabItem();
@@ -182,8 +186,15 @@ namespace CreateIDE
             // Set the welcome message
             tabItem.Content = "\nWelcome to CreateIDE";
             tabItems.Add(tabItem);
-            // Set it to have focus
-            DynamicTab.SelectedIndex = tabItems.Count;
+            // Update the UI
+            DynamicTab.DataContext = null;
+            DynamicTab.DataContext = tabItems;
+            if (hasFocus)
+            {
+                // Set it to have focus
+                // We subtract 1 since we need to start counting from 0
+                DynamicTab.SelectedIndex = tabItems.Count - 1;
+            }
         }
 
 
@@ -657,35 +668,62 @@ namespace CreateIDE
 
         private void AddFile(object sender, RoutedEventArgs e)
         {
-            TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
-            string tempfilename = "";
-            if (Dialogs.InputBox("Add File", "Enter the filename and extension", "Untitled.cs", ref tempfilename) == System.Windows.Forms.DialogResult.OK)
+            try
             {
-                if (File.GetAttributes(SelectedItem.Tag.ToString()).HasFlag(FileAttributes.Directory))
+                TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+                string tempfilename = "";
+                FileStream fileStream;
+                if (Dialogs.InputBox("Add File", "Enter the filename and extension", "Untitled.cs", ref tempfilename) == System.Windows.Forms.DialogResult.OK)
                 {
-                    if (File.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)) && MessageBox.Show($"A file with the name '{tempfilename}' already exists do you wish to overide it?", "File Exists", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                    if (File.GetAttributes(SelectedItem.Tag.ToString()).HasFlag(FileAttributes.Directory))
                     {
-                        // If a file with the same name exists and the user wishes to overide it do it
-                        File.Create(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
-                    } else
-                    {
-                        // If no file with the same name exists then create the file
-                        File.Create(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
-                    }
-                } else
-                {
-                    if (File.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)) && MessageBox.Show($"A file with the name '{tempfilename}' already exists do you wish to overide it?", "File Exists", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-                    {
-                        // If a file with the same name exists and the user wishes to overide it do it
-                        File.Create(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                        if (File.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)) && MessageBox.Show($"A file with the name '{tempfilename}' already exists do you wish to override it?", "File Exists", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                        {
+                            // If a file with the same name exists and the user wishes to override it do it
+                            fileStream = File.Create(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                        }
+                        else
+                        {
+                            // If no file with the same name exists then create the file
+                            fileStream = File.Create(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
+                        }
+
+                        // We need to close the assigned file stream. The reason that we create the file stream in the
+                        // first place is because if we don't the method File.Create will return an unassigned fileStream which
+                        // will cause an exception
+                        fileStream.Close();
+                        if (tempfilename.Split('.').Last() == "cs")
+                        {
+                            File.WriteAllText(Path.Combine(SelectedItem.Tag.ToString(), tempfilename), File.ReadAllText("Presets/CSharp.txt"));
+                        }
                     }
                     else
                     {
-                        // If no file with the same name exists then create the file
-                        File.Create(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                        if (File.Exists(Path.Combine(SelectedItem.Tag.ToString(), tempfilename)) && MessageBox.Show($"A file with the name '{tempfilename}' already exists do you wish to override it?", "File Exists", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                        {
+                            // If a file with the same name exists and the user wishes to override it do it
+                            fileStream = File.Create(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                        }
+                        else
+                        {
+                            // If no file with the same name exists then create the file
+                            fileStream = File.Create(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
+                        }
+                        // We need to close the assigned file stream. The reason that we create the file stream in the
+                        // first place is because if we don't the method File.Create will return an unassigned fileStream which
+                        // will cause an exception
+                        fileStream.Close();
+                        if (tempfilename.Split('.').Last() == "cs")
+                        {
+                            File.WriteAllText(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename), File.ReadAllText("Presets/CSharp.txt"));
+                        }
                     }
+                    CreateFileView();
                 }
-                CreateFileView();
+
+            } catch (System.NullReferenceException)
+            {
+
             }
         }
 
@@ -836,7 +874,7 @@ namespace CreateIDE
         {
             RunConfig window = new RunConfig();
             window.supplyArgs(references, sourceFile,
-                    WarningLvl, TreatWarningsAsErrors, compilerOptions, IncludeDebugInfo, startMethod);
+                    WarningLvl, TreatWarningsAsErrors, compilerOptions, IncludeDebugInfo, startMethod, CompOpt, autoRunExe);
             window.Show();
         }
 

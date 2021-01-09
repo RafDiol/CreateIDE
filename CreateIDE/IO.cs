@@ -120,7 +120,7 @@ namespace CreateIDE
             fd.Filter = "Project Creation (*.prj)|*.prj";
             if (fd.ShowDialog() == DialogResult.OK) // Successfully selected a file
             {
-                // Create some basic variables neededlater down the line
+                // Create some basic variables needed later down the line
                 projectPath = fd.FileName;
                 projectFolderPath = System.IO.Path.GetDirectoryName(projectPath);
                 projectName = System.IO.Path.GetFileName(projectPath);

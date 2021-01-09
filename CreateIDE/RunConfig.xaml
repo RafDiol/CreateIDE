@@ -20,7 +20,6 @@
                 <Label VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0, 30, 0, 0" Content="References"/>
                 <!-- The Reference Layout -->
                 <ListBox x:Name="refListBox" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="150" Margin="0, 10, 0, 0">
-
                 </ListBox>
                 <Button Content="Add" Click="AddRef" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="25" Margin="200, -105, 0, 0"/>
                 <Button Content="Remove" Click="RemoveRef" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" Height="25" Margin="200, -75, 0, 0"/>
@@ -35,7 +34,7 @@
                     <ComboBoxItem Content="5"/>
                 </ComboBox>
                 <CheckBox x:Name="treatWarningsAsErrorsCheckbox" Content="Treat Warnings As Errors" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="25" Margin="0, 30, 0, 0" />
-                <CheckBox x:Name="inculdeDebugInfo" Content="Include Debug Info" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="25" Margin="0, 30, 0, 0" />
+                <CheckBox x:Name="inculdeDebugInfoCheckbox" Content="Include Debug Info" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" Height="25" Margin="0, 30, 0, 0" />
                 <Button VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Height="35" Content="Apply" Click="Apply"/>
             </StackPanel>
         </ScrollViewer>
