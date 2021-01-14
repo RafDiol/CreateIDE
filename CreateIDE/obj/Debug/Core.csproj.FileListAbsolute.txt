@@ -241,6 +241,8 @@ C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\exe.png
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\obj\Debug\RunConfig.g.cs
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\obj\Debug\YourIDE_MarkupCompile.lref
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\obj\Debug\RunConfig.baml
-C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Presets\CSharp.txt
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\obj\Debug\CreatePrj.g.cs
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\obj\Debug\CreatePrj.baml
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Presets\HTML.txt
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\html.png
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\AppIcons\dotMenu.png

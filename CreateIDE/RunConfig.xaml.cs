@@ -17,6 +17,7 @@ using CreateIDE;
 using CompileOption = CreateIDE.MainWindow.CompileOption;
 using Dialogs = CreateIDE.MainWindow.Dialogs;
 using Settings = YourIDE.Properties.Settings;
+using System.Collections.Specialized;
 
 namespace CreateIDE
 {
@@ -35,32 +36,33 @@ namespace CreateIDE
         public RunConfig()
         {
             InitializeComponent();
+            // Update the arguments with their latest values
+            updateArgs();
         }
 
         // This method assigns the default or last used values to our GUI components
-        public void supplyArgs(string[] references, string sourceFile, int WarningLevel, bool TreatWarningsAsErrors, string compilerOptions, bool IncludeDebugInfo,
-            string startMethod, CompileOption compileOption, bool autoRun)
+        public void updateArgs()
         {
             // References
             refListBox.Items.Clear();
-            for (int i = 0; i < references.Count(); i++)
+            for (int i = 0; i < Settings.Default.references.Count; i++)
             {
-                refListBox.Items.Add(references[i]);
+                refListBox.Items.Add(Settings.Default.references[i]);
             }
 
-            this.sourceFile = sourceFile;
+            this.sourceFile = Settings.Default.sourceFile;
 
-            warningLvlComboBox.SelectedIndex = WarningLevel;
+            warningLvlComboBox.SelectedIndex = Settings.Default.warningLvl;
 
-            outputTypeComboBox.SelectedIndex = (int)compileOption;
+            outputTypeComboBox.SelectedIndex = Settings.Default.compileOption;
 
-            autoRunCheckBox.IsChecked = autoRun;
+            autoRunCheckBox.IsChecked = Settings.Default.autoRun;
 
-            startMethodTxtBox.Text = startMethod;
+            startMethodTxtBox.Text = Settings.Default.startMethod;
 
-            treatWarningsAsErrorsCheckbox.IsChecked = TreatWarningsAsErrors;
+            treatWarningsAsErrorsCheckbox.IsChecked = Settings.Default.treatWarningsAsErrors;
 
-            inculdeDebugInfoCheckbox.IsChecked = IncludeDebugInfo;
+            inculdeDebugInfoCheckbox.IsChecked = Settings.Default.includeDebugInfo;
         }
 
         private void ChangeSourceFile(object sender, RoutedEventArgs e) 
@@ -78,7 +80,7 @@ namespace CreateIDE
         private void AddRef(object sender, RoutedEventArgs e)
         {
             string reference = ""; // needs to not be equal to null in order to use the keyword ref in the following line
-            if (Dialogs.InputBox("Add File", "Enter the filename and extension", "Untitled.cs", ref reference) == System.Windows.Forms.DialogResult.OK)
+            if (Dialogs.InputBox("Add File", "Enter the filename and extension", "", ref reference) == System.Windows.Forms.DialogResult.OK)
             {
                 refListBox.Items.Add(reference);
             }
@@ -112,14 +114,9 @@ namespace CreateIDE
             Settings.Default.autoRun = (bool)autoRunCheckBox.IsChecked;
 
             // References
-            /*
-            * The reason that we do not just clear the references and then just re-append them one by one is because
-            * if a project has a lot of references then we do not want to be re-creating the reference list from scratch
-            * every time due to performance concerns
-            */
-            for (int i=0; i < refListBox.Items.Count - 1; i++)
+            Settings.Default.references.Clear();
+            for (int i=0; i < refListBox.Items.Count; i++)
             {
-                Console.WriteLine("Saved " + i);
                 Settings.Default.references.Add(refListBox.Items[i].ToString());
             }
 

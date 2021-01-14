@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.IO;
+using System.Windows.Forms;
 
 namespace YourIDE
 {
@@ -22,6 +24,35 @@ namespace YourIDE
         public CreatePrj()
         {
             InitializeComponent();
+        }
+
+        public string getProjectPath()
+        {
+            return projectPathTextBox.Text;
+        }
+
+        public string getProjectNamespace()
+        {
+            return namespaceTextbox.Text;
+        }
+
+        public string getProjectName()
+        {
+            return projectNameTextBox.Text;
+        }
+
+        private void CreatePrj_Btn(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void ChoosePath(object sender, RoutedEventArgs e)
+        {
+            System.Windows.Forms.FolderBrowserDialog fd = new System.Windows.Forms.FolderBrowserDialog();
+            if (fd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                projectPathTextBox.Text = fd.SelectedPath;
+            }
         }
     }
 }

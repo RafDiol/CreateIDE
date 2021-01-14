@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("appicons/close.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("appicons/dotmenu.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("appicons/refresh.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/copyicon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/cs.png")]
@@ -18,6 +19,7 @@
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/exe.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/exiticon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/fonticon.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/html.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/img.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/pasteicon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/pdf.png")]
@@ -33,6 +35,6 @@
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/unknown.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/folder.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/zip.png")]
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("presets/csharp.txt")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("presets/html.txt")]
 
 

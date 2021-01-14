@@ -112,26 +112,5 @@ namespace CreateIDE
                 throw new IndexOutOfRangeException();
             }
         }
-
-        public void NewProject(string version, string startMethod ,out string projectPath, out string projectFolderPath ,out string projectName)
-        {
-            SaveFileDialog fd = new SaveFileDialog();
-            fd.FilterIndex = 1;
-            fd.Filter = "Project Creation (*.prj)|*.prj";
-            if (fd.ShowDialog() == DialogResult.OK) // Successfully selected a file
-            {
-                // Create some basic variables needed later down the line
-                projectPath = fd.FileName;
-                projectFolderPath = System.IO.Path.GetDirectoryName(projectPath);
-                projectName = System.IO.Path.GetFileName(projectPath);
-                // Now lets save this project
-                File.WriteAllText(projectPath, $"{version}{Environment.NewLine}{projectName}{Environment.NewLine}{startMethod}");
-                Directory.CreateDirectory(Path.Combine(projectPath, "bin"));
-            }
-            else
-            {
-                throw new IOException("The file dialog was closed by the user");
-            }
-        }
     }
 }

@@ -75,6 +75,7 @@ namespace CreateIDE
         public bool TreatWarningsAsErrors = false, IncludeDebugInfo = true, autoRunExe = true;
         public string compilerOptions = "", startMethod, sourceFile;
         public CompileOption CompOpt = CompileOption.EXE;
+        string Namespace;
 
         public MainWindow()
         {
@@ -155,22 +156,47 @@ namespace CreateIDE
 
         private void CloseTab(object sender, MouseButtonEventArgs e)
         {
-            Image img = (Image)sender;
-            StackPanel stkpanel = (StackPanel)img.Parent;
-            TabItem tab = (TabItem)stkpanel.Parent;
-            if (tab.Tag.ToString() != "welcome") // Just to prevent crushes and exceptions
+            TabItem tab = null;
+            try
             {
-                if (File.ReadAllText(filepath) != textEditor.Text && MessageBox.Show("Do you want to save the changes made?", "Save Changes", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                Image img = (Image)sender;
+                StackPanel stkpanel = (StackPanel)img.Parent;
+                tab = (TabItem)stkpanel.Parent;
+                if (tab.Tag.ToString() != "welcome") // Just to prevent crushes and exceptions
                 {
-                    // Save the file and the continue on closing the file
-                    SaveFile();
+                    if (File.ReadAllText(filepath) != textEditor.Text && MessageBox.Show("Do you want to save the changes made?", "Save Changes", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                    {
+                        // Save the file and the continue on closing the file
+                        SaveFile();
+                    }
                 }
             }
+            catch (FileNotFoundException)
+            {
+                // Do nothing
+            }
+            finally
+            {
+                tabItems.Remove(tab);
+                DynamicTab.DataContext = null;
+                DynamicTab.DataContext = tabItems;
+                DynamicTab.SelectedIndex = tabItems.Count - 1; // We subtract 1 because we need to start counting from index 0
+                                                               // Add the welcome tab if no tabs are open
+                if (tabItems.Count() == 0)
+                {
+                    AddWelcomeTab();
+                }
+            }
+            
+        }
+
+        private void ForceCloseTab(TabItem tab)
+        {
             tabItems.Remove(tab);
             DynamicTab.DataContext = null;
             DynamicTab.DataContext = tabItems;
             DynamicTab.SelectedIndex = tabItems.Count - 1; // We subtract 1 because we need to start counting from index 0
-            // Add the welcome tab if no tabs are open
+                                                           // Add the welcome tab if no tabs are open
             if (tabItems.Count() == 0)
             {
                 AddWelcomeTab();
@@ -433,23 +459,24 @@ namespace CreateIDE
         {
             try
             {
-                ioHandler.NewProject(VERSION, startMethod, out projectPath, out projectFolderPath, out projectName);
+                CreatePrj window = new CreatePrj();
+                window.ShowDialog();
+
+                Namespace = window.getProjectNamespace();
+                projectFolderPath = window.getProjectPath();
+                projectName = window.getProjectName();
+                projectPath = Path.Combine(window.getProjectPath(), projectName+".prj");
+                File.WriteAllText(projectPath, VERSION);
+                // Now lets dispose the window
+                window = null;
+
+                this.Title = $"{projectName} - CreateIDE";
+                CreateFileView();
             }
-            catch (IOException)
+            catch
             {
-                // The user did not select a file
-                return;
+
             }
-            // Configure accordingly
-            if (textEditor != null) // Sanity Check
-            {
-                if (text != textEditor.Text)
-                {
-                    // Save
-                }
-            }
-            this.Title = $"{projectName} - CreateIDE";
-            CreateFileView();
         }
 
         private void Exit(object sender, RoutedEventArgs e)
@@ -484,6 +511,7 @@ namespace CreateIDE
         private void FileViewElementDoubleClick(object sender, MouseButtonEventArgs e)
         {
             TreeViewItem senderItem = sender as TreeViewItem;
+            string senderTag = senderItem.Tag.ToString();
             bool isDirecotry = File.GetAttributes(senderItem.Tag.ToString()).HasFlag(FileAttributes.Directory);
             if (isDirecotry)
             {
@@ -491,9 +519,19 @@ namespace CreateIDE
             }
             if (senderItem.IsSelected)
             {
+                for (int i=0; i < tabItems.Count; i++)
+                {
+                    if (tabItems[i].Tag.ToString() == senderTag)
+                    {
+                        // Set the already open folder tab to have focus
+                        DynamicTab.SelectedItem = tabItems[i];
+                        // Return
+                        return;
+                    }
+                }
                 StackPanel stackPanel = (StackPanel)senderItem.Header;
                 TextBlock textBlock = (TextBlock)stackPanel.Children[1];
-                AddTabItem(textBlock.Text, senderItem.Tag.ToString());
+                AddTabItem(textBlock.Text, senderTag);
                 if (filepath != null && File.ReadAllText(filepath) == textEditor.Text)
                 {
                     SaveFile();
@@ -574,6 +612,10 @@ namespace CreateIDE
                 else if (tempfilename.EndsWith(".exe"))
                 {
                     item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/exe.png");
+                }
+                else if (tempfilename.EndsWith(".html") || tempfilename.EndsWith(".htm"))
+                {
+                    item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/html.png");
                 }
                 else
                 {
@@ -671,6 +713,12 @@ namespace CreateIDE
             try
             {
                 TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+
+                if (SelectedItem == null)
+                {
+                    return;
+                } // Sanity Check
+
                 string tempfilename = "";
                 FileStream fileStream;
                 if (Dialogs.InputBox("Add File", "Enter the filename and extension", "Untitled.cs", ref tempfilename) == System.Windows.Forms.DialogResult.OK)
@@ -692,10 +740,7 @@ namespace CreateIDE
                         // first place is because if we don't the method File.Create will return an unassigned fileStream which
                         // will cause an exception
                         fileStream.Close();
-                        if (tempfilename.Split('.').Last() == "cs")
-                        {
-                            File.WriteAllText(Path.Combine(SelectedItem.Tag.ToString(), tempfilename), File.ReadAllText("Presets/CSharp.txt"));
-                        }
+                        addDefautFileContent(Path.Combine(SelectedItem.Tag.ToString(), tempfilename));
                     }
                     else
                     {
@@ -713,10 +758,7 @@ namespace CreateIDE
                         // first place is because if we don't the method File.Create will return an unassigned fileStream which
                         // will cause an exception
                         fileStream.Close();
-                        if (tempfilename.Split('.').Last() == "cs")
-                        {
-                            File.WriteAllText(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename), File.ReadAllText("Presets/CSharp.txt"));
-                        }
+                        addDefautFileContent(Path.Combine(Path.GetDirectoryName(SelectedItem.Tag.ToString()), tempfilename));
                     }
                     CreateFileView();
                 }
@@ -730,6 +772,11 @@ namespace CreateIDE
         private void AddFolder(object sender, RoutedEventArgs e)
         {
             TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+            if (SelectedItem == null)
+            {
+                return;
+            } // Sanity Check
+
             string tempfilename = "";
             if (Dialogs.InputBox("Add Folder", "Enter the folder name", "New Folder", ref tempfilename) == System.Windows.Forms.DialogResult.OK)
             {
@@ -790,7 +837,7 @@ namespace CreateIDE
             TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
             string tempfilepath = SelectedItem.Tag.ToString();
             FileInfo fileInfo = new FileInfo(SelectedItem.Tag.ToString());
-            if (MessageBox.Show($"'{fileInfo.Name}' will be deleted permanantly.", "Delete", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.OK)
+            if (MessageBox.Show($"'{fileInfo.Name}' will be deleted permanently.", "Delete", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.OK)
             {
                 if (File.Exists(tempfilepath))
                 {
@@ -800,6 +847,14 @@ namespace CreateIDE
                     ioHandler.DeleteDirectory(tempfilepath);
                 }
                 CreateFileView();
+                for (int i=0; i < tabItems.Count; i++)
+                {
+                    if (tabItems[i].Tag.ToString() == tempfilepath)
+                    {
+                        ForceCloseTab(tabItems[i]);
+                        break;
+                    }
+                }
             }
         }
 
@@ -828,6 +883,16 @@ namespace CreateIDE
                     }
                 }
                 CreateFileView();
+            }
+        }
+
+        private void addDefautFileContent(string path)
+        {
+            // Check whether default content exists for this kind of file
+            Console.WriteLine(path.Split('.').Last());
+            if (path.Split('.').Last() == "html" || path.Split('.').Last() == "htm")
+            {
+                File.WriteAllText(path, File.ReadAllText("Presets/HTML.txt"));
             }
         }
         
@@ -873,8 +938,6 @@ namespace CreateIDE
         private void ConfigRunSettings()
         {
             RunConfig window = new RunConfig();
-            window.supplyArgs(references, sourceFile,
-                    WarningLvl, TreatWarningsAsErrors, compilerOptions, IncludeDebugInfo, startMethod, CompOpt, autoRunExe);
             window.Show();
         }
 

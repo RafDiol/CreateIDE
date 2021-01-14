@@ -9,8 +9,13 @@
     <Grid>
         <Label HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 0, 0, 0" Content="Project Name"/>
         <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 30, 0, 0" Width="200" Height="25" Name="projectNameTextBox"/>
-        <Label HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 60, 0, 0" Content="Namespace"/>
-        <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 90, 0, 0" Width="200" Height="25" Text="{Binding Path=Text, ElementName=projectNameTextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-        <CheckBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 130, 0, 0" Content="Default File Content" IsChecked="True"/>
+        <Label HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 60, 0, 0" Content="Project Path"/>
+        <Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="200, 90, 0, 0" Height="25" Width="30" Click="ChoosePath" >
+            <Image Source="AppIcons/dotMenu.png"/>
+        </Button>
+        <TextBox HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 90, 0, 0" Width="200" Height="25" Name="projectPathTextBox"/>
+        <Label HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 120, 0, 0" Content="Namespace"/>
+        <TextBox x:Name="namespaceTextbox" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 150, 0, 0" Width="200" Height="25" Text="{Binding Path=Text, ElementName=projectNameTextBox, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <Button HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 190, 0, 0" Content="Create" Width='100' Click="CreatePrj_Btn"/>
     </Grid>
 </Window>
