@@ -35,6 +35,7 @@
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/unknown.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/folder.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/zip.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("presets/csharp.txt")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("presets/html.txt")]
 
 

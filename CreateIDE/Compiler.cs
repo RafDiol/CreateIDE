@@ -10,11 +10,16 @@ using System.CodeDom.Compiler;
 using Microsoft.CSharp;
 using System.IO;
 using Path = System.IO.Path;
+using System.Runtime.InteropServices;
+using System.Threading;
+using Settings = YourIDE.Properties.Settings;
+using System.Diagnostics;
 
 namespace YourIDE
 {
     class Compiler
     {
+        static string exePath = null;
         public void CompileToExe(string outputPath, string projectPath ,string[] references,
             string outfilename, string sourceFile, int WarningLevel, bool TreatWarningsAsErrors, string compilerOptions, bool IncludeDebugInfo,
             string startMethod)
@@ -27,7 +32,7 @@ namespace YourIDE
             cp.GenerateExecutable = true;
 
             // Set the assembly file name to generate.
-            cp.OutputAssembly = Path.Combine(outputPath, outfilename+".exe");
+            exePath = cp.OutputAssembly = Path.Combine(outputPath, outfilename+".exe");
 
             // Generate debug information.
             cp.IncludeDebugInformation = IncludeDebugInfo;
@@ -88,22 +93,7 @@ namespace YourIDE
             // Invoke compilation.
             CompilerResults cr = provider.CompileAssemblyFromFile(cp, sourceFile);
 
-            if (cr.Errors.Count > 0)
-            {
-                // Display compilation errors.
-                Console.WriteLine("Errors building {0} into {1}",
-                    projectPath, cr.PathToAssembly);
-                foreach (CompilerError ce in cr.Errors)
-                {
-                    Console.WriteLine("  {0}", ce.ToString());
-                    Console.WriteLine();
-                }
-            }
-            else
-            {
-                Console.WriteLine("Source {0} built into {1} successfully.",
-                    projectPath, cr.PathToAssembly);
-            }
+            ShowErrors(cr.Errors.Count, cr);
         }
 
         public void CompileToDLL(string outputPath, string projectPath, string[] references,
@@ -154,21 +144,36 @@ namespace YourIDE
             // Invoke compilation.
             CompilerResults cr = provider.CompileAssemblyFromFile(cp, sourceFile);
 
-            if (cr.Errors.Count > 0)
+            ShowErrors(cr.Errors.Count, cr);
+        }
+        
+        private static void ShowErrors(int count, CompilerResults cr)
+        {
+            Log log = new Log();
+            log.Show();
+            if (count > 0)
             {
-                // Display compilation errors.
-                Console.WriteLine("Errors building {0} into {1}",
-                    projectPath, cr.PathToAssembly);
                 foreach (CompilerError ce in cr.Errors)
                 {
-                    Console.WriteLine("  {0}", ce.ToString());
-                    Console.WriteLine();
+                    log.Error(ce.ToString());
                 }
             }
             else
             {
-                Console.WriteLine("Source {0} built into {1} successfully.",
-                    projectPath, cr.PathToAssembly);
+                log.Success("Project Compiled Successfully...");
+                if (Settings.Default.autoRun == true && Settings.Default.compileOption == 0)
+                {
+                    try
+                    {
+                        log.Success("\nStarting App...");
+                        Process.Start(exePath);
+                        log.Success("\nApp Started...");
+                    }
+                    catch
+                    {
+                        log.Error("Failed To Launch App...");
+                    }
+                }
             }
         }
     }

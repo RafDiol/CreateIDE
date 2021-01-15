@@ -1,0 +1,14 @@
+﻿using System;
+using System.IO;
+
+namespace CHANGE_WITH_YOUR_NAMESPACE
+{
+    class NewClass
+    {
+        public static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World");
+            Console.ReadLine();
+        }
+    }
+}

@@ -83,7 +83,7 @@ namespace CreateIDE
             Directory.Delete(target_dir, false);
         }
 
-        public void OpenProject(Encoding encoding, out string projectPath, out string projectFolderPath, out string projectName, out string version, out string startMethod)
+        public void OpenProject(Encoding encoding, out string projectPath, out string projectFolderPath, out string projectName, out string version)
         {
             try
             {
@@ -100,8 +100,7 @@ namespace CreateIDE
                     text = File.ReadAllText(fd.FileName, encoding);
                     data = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
                     version = data[0];
-                    projectName = data[1];
-                    startMethod = data[2];
+                    projectName = fd.SafeFileName;
                 }
                 else
                 {

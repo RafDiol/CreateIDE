@@ -73,7 +73,7 @@ namespace CreateIDE
         public string[] references = { "System", "System.Linq", "System.IO"};
         public int WarningLvl = 3;
         public bool TreatWarningsAsErrors = false, IncludeDebugInfo = true, autoRunExe = true;
-        public string compilerOptions = "", startMethod, sourceFile;
+        public string compilerOptions = "", startMethod = "Main", sourceFile;
         public CompileOption CompOpt = CompileOption.EXE;
         string Namespace;
 
@@ -112,7 +112,7 @@ namespace CreateIDE
             tabItem.Tag = tag;
             // Content
             TextEditor tabEditor = new TextEditor();
-            tabEditor.Name = "tabEditor";
+            tabEditor.Name = $"tabEditor";
             tabEditor.SyntaxHighlighting = ICSharpCode.AvalonEdit.Highlighting.HighlightingManager.Instance.GetDefinition("C#");
             tabEditor.FontSize = 15;
             tabEditor.TextArea.TextEntering += textEditor_TextArea_TextEntering;
@@ -125,7 +125,7 @@ namespace CreateIDE
             DynamicTab.DataContext = null;
             DynamicTab.DataContext = tabItems;
             // Set it to have focus
-            DynamicTab.SelectedIndex = tabItems.Count - 1; // We subtruct 1 because we need to start counting from 0
+            DynamicTab.SelectedIndex = tabItems.Count - 1; // We subtract 1 because we need to start counting from 0
         }
 
 
@@ -162,6 +162,7 @@ namespace CreateIDE
                 Image img = (Image)sender;
                 StackPanel stkpanel = (StackPanel)img.Parent;
                 tab = (TabItem)stkpanel.Parent;
+                
                 if (tab.Tag.ToString() != "welcome") // Just to prevent crushes and exceptions
                 {
                     if (File.ReadAllText(filepath) != textEditor.Text && MessageBox.Show("Do you want to save the changes made?", "Save Changes", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
@@ -186,6 +187,7 @@ namespace CreateIDE
                 {
                     AddWelcomeTab();
                 }
+
             }
             
         }
@@ -416,7 +418,7 @@ namespace CreateIDE
         {
             try
             {
-                ioHandler.OpenProject(encoding, out projectPath, out projectFolderPath, out projectName, out projectVersion, out startMethod);
+                ioHandler.OpenProject(encoding, out projectPath, out projectFolderPath, out projectName, out projectVersion);
             }
             catch (IOException)
             {
@@ -581,7 +583,7 @@ namespace CreateIDE
                 {
                     item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/db.png");
                 }
-                else if (tempfilename.EndsWith(".xml"))
+                else if (tempfilename.EndsWith(".xml") || tempfilename.EndsWith(".json"))
                 {
                     item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/xml.png");
                 }
@@ -816,6 +818,7 @@ namespace CreateIDE
         private void CopyFullPath(object sender, RoutedEventArgs e)
         {
             TreeViewItem SelectedItem = fileViewer.SelectedItem as TreeViewItem;
+            if (SelectedItem == null) { return; }
             Clipboard.Clear();
             Clipboard.SetText(SelectedItem.Tag.ToString());
         }
@@ -889,10 +892,13 @@ namespace CreateIDE
         private void addDefautFileContent(string path)
         {
             // Check whether default content exists for this kind of file
-            Console.WriteLine(path.Split('.').Last());
             if (path.Split('.').Last() == "html" || path.Split('.').Last() == "htm")
             {
                 File.WriteAllText(path, File.ReadAllText("Presets/HTML.txt"));
+            }
+            else if (path.Split('.').Last() == "cs")
+            {
+                File.WriteAllText(path, File.ReadAllText("Presets/CSharp.txt"));
             }
         }
         
@@ -901,15 +907,13 @@ namespace CreateIDE
         {
             if (sourceFile == null)
             {
+                MessageBox.Show("You must selected the file from which the execution will begin", "Source File", System.Windows.Forms.MessageBoxButtons.OK);
                 OpenFileDialog fd = new OpenFileDialog();
                 fd.FilterIndex = 1;
                 fd.Multiselect = false;
-                fd.Filter = "C# File(*.cs)|*.cs | All Files (*.*)|*.*";
+                fd.Filter = "C# File(*.cs)|*.cs| All Files (*.*)|*.*";
                 if (fd.ShowDialog() == System.Windows.Forms.DialogResult.OK) // Successfully selected a file
                 {
-                    projectPath = fd.FileName;
-                    projectFolderPath = System.IO.Path.GetDirectoryName(projectPath);
-                    text = File.ReadAllText(fd.FileName, encoding);
                     sourceFile = Path.Combine(projectFolderPath, fd.FileName);
                 } else
                 {
