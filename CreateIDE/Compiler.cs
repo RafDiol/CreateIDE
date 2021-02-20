@@ -21,8 +21,7 @@ namespace YourIDE
     {
         static string exePath = null;
         public void CompileToExe(string outputPath, string projectPath ,string[] references,
-            string outfilename, string sourceFile, int WarningLevel, bool TreatWarningsAsErrors, string compilerOptions, bool IncludeDebugInfo,
-            string startMethod)
+            string outfilename, string sourceFile, int WarningLevel, bool TreatWarningsAsErrors, string compilerOptions, bool IncludeDebugInfo)
         {
             CSharpCodeProvider provider = new CSharpCodeProvider();
             CompilerParameters cp = new CompilerParameters();
@@ -62,12 +61,6 @@ namespace YourIDE
             // and does not delete them after compilation.
             cp.TempFiles = new TempFileCollection(".", false);
 
-            if (provider.Supports(GeneratorSupport.EntryPointMethod))
-            {
-                // Specify the class that contains
-                // the main method of the executable.
-                cp.MainClass = startMethod;
-            }
 
             if (Directory.Exists("Resources"))
             {

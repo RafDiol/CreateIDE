@@ -5,18 +5,42 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="YourIDE" WindowState="Maximized">
+
+    <Window.Resources>
+        <RoutedUICommand x:Key="SaveCommand"/>
+        <RoutedUICommand x:Key="SaveAllCommand"/>
+        <RoutedUICommand x:Key="OpenProjectCommand"/>
+        <RoutedUICommand x:Key="RunCommand"/>
+    </Window.Resources>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource SaveCommand}" Executed="SaveBinding" />
+        <CommandBinding Command="{StaticResource SaveAllCommand}" Executed="SaveAllBinding" />
+        <CommandBinding Command="{StaticResource OpenProjectCommand}" Executed="OpenProjectBinding" />
+        <CommandBinding Command="{StaticResource RunCommand}" Executed="RunBinding" />
+    </Window.CommandBindings>
+
+    <Window.InputBindings>
+        <KeyBinding Command="{StaticResource SaveCommand}" Key="S" Modifiers="Ctrl" />
+        <KeyBinding Command="{StaticResource SaveAllCommand}" Key="S" Modifiers="Windows" />
+        <KeyBinding Command="{StaticResource OpenProjectCommand}" Key="O" Modifiers="Ctrl" />
+        <KeyBinding Command="{StaticResource RunCommand}" Key="R" Modifiers="Ctrl" />
+    </Window.InputBindings>
+
     <Grid>
-        <Menu VerticalAlignment="Top" HorizontalAlignment="Stretch" Height="20" Margin="0, 0, 300, 0">
+        <Menu VerticalAlignment="Top" HorizontalAlignment="Stretch" Height="20" Margin="0, 0, 300, 0" Name="menu">
             <MenuItem Header="_File">
                 <MenuItem Header="_New Project" Click="NewProject"/>
-                <MenuItem Header="_Open Project" Click="OpenProject" />
+                <MenuItem Header="_Open Project" Click="OpenProject" InputGestureText="Ctrl+O"/>
                 <Separator/>
-                <MenuItem Header="_Save File" Click="SaveFile">
+                <MenuItem Header="_Save File" Click="SaveFile" InputGestureText="Ctrl+S">
                     <MenuItem.Icon>
                         <Image Source="/Icons/SaveFileIcon.png"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="_Save All Files" />
+                <MenuItem Header="_Save All Files" Click="SaveAllFiles" InputGestureText="Shift+S"/>
+                <Separator/>
+                <MenuItem Header="Print File" Click="PrintFile"/>
                 <Separator/>
                 <MenuItem Header="_Exit" Click="Exit">
                     <MenuItem.Icon>
@@ -25,9 +49,7 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Edit">
-                <MenuItem Header="Find"></MenuItem>
-                <MenuItem Header="Find Occurances"></MenuItem>
-                <MenuItem Header="Go To"></MenuItem>
+                <MenuItem Header="Go To" Click="goToLine"></MenuItem>
                 <Separator/>
                 <MenuItem Header="Undo" Click="Undo">
                     <MenuItem.Icon>
@@ -63,8 +85,20 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Run">
-                <MenuItem Header="Run" Click="Run"/>
+                <MenuItem Header="Run" Click="Run" InputGestureText="Ctrl+R"/>
                 <MenuItem Header="Configure Run Settings" Click="ConfigRunSettings"/>
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Full Screen"/>
+                <MenuItem Header="Theme">
+                    <StackPanel>
+                        <RadioButton Content="Light Theme" Name="lightThemeRadioBtn" Checked="themeChanged"/>
+                        <RadioButton Content="Dark theme" Name="darkThemeRadioBtn" Checked="themeChanged"/>
+                    </StackPanel>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="Go to website" Click="GotoWebsite"/>
             </MenuItem>
         </Menu>
         <TabControl Name="DynamicTab" ItemsSource="{Binding}" SelectionChanged="TabSelectionChanged" Margin="0, 20, 300, 0">

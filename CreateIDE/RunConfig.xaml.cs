@@ -58,8 +58,6 @@ namespace CreateIDE
 
             autoRunCheckBox.IsChecked = Settings.Default.autoRun;
 
-            startMethodTxtBox.Text = Settings.Default.startMethod;
-
             treatWarningsAsErrorsCheckbox.IsChecked = Settings.Default.treatWarningsAsErrors;
 
             inculdeDebugInfoCheckbox.IsChecked = Settings.Default.includeDebugInfo;
@@ -119,9 +117,6 @@ namespace CreateIDE
             {
                 Settings.Default.references.Add(refListBox.Items[i].ToString());
             }
-
-            // Start Method
-            Settings.Default.startMethod = startMethodTxtBox.Text;
 
             // Warning Level
             Settings.Default.warningLvl = warningLvlComboBox.SelectedIndex;

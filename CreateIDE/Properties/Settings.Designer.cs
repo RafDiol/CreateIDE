@@ -75,18 +75,6 @@ namespace YourIDE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Main")]
-        public string startMethod {
-            get {
-                return ((string)(this["startMethod"]));
-            }
-            set {
-                this["startMethod"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int warningLvl {
             get {
@@ -118,6 +106,18 @@ namespace YourIDE.Properties {
             }
             set {
                 this["includeDebugInfo"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int theme {
+            get {
+                return ((int)(this["theme"]));
+            }
+            set {
+                this["theme"] = value;
             }
         }
     }

@@ -36,6 +36,9 @@ using System.Diagnostics.CodeAnalysis;
 using TextBox = System.Windows.Forms.TextBox;
 using Button = System.Windows.Controls.Button;
 using YourIDE;
+using System.Reflection;
+using System.Diagnostics;
+using Settings = YourIDE.Properties.Settings;
 
 namespace CreateIDE
 {
@@ -52,6 +55,31 @@ namespace CreateIDE
             DLL = 1
         }
 
+        // Themes
+        public enum Themes
+        {
+            LightTheme = 0,
+            DarkTheme = 1
+        }
+
+        Themes theme = Themes.LightTheme;
+
+        public struct Theme 
+        {
+            public Brush editorBgColor;
+            public Brush editorFgColor;
+            public Brush fileEditorBgColor;
+            public Brush fileEditorFgColor;
+            public Brush tabItemFgColor;
+            public Brush tabItemBgColor;
+        }
+
+        // Define Themes
+        Theme lightTheme;
+        Theme darkTheme;
+        Theme currentTheme;
+
+
         CompletionWindow completionWindow;
         IList<ICompletionData> completionListData;
         IO_Handler ioHandler;
@@ -62,7 +90,10 @@ namespace CreateIDE
         private object dummyNode = null;
         bool isAutocompleteActive = false;
         private List<TabItem> tabItems;
-        private TextEditor textEditor = null;
+        private TextEditor textEditor = new TextEditor();
+
+        public static readonly string PROJECT_URL = "";
+        public static readonly int PROJECT_SAVE_FILE_DATA_LENGHT = 1;
         // Compiler Parameters
         /*
          * The Compiler parameters are static because they need to be referenced by the RunConfig.cs file without
@@ -73,7 +104,7 @@ namespace CreateIDE
         public string[] references = { "System", "System.Linq", "System.IO"};
         public int WarningLvl = 3;
         public bool TreatWarningsAsErrors = false, IncludeDebugInfo = true, autoRunExe = true;
-        public string compilerOptions = "", startMethod = "Main", sourceFile;
+        public string compilerOptions = "", sourceFile;
         public CompileOption CompOpt = CompileOption.EXE;
         string Namespace;
 
@@ -88,7 +119,67 @@ namespace CreateIDE
             // File Viewer
             CreateFileView();
             fileViewer.ContextMenuClosing += fileViewerContextMenuClosing;
+            // Setup Themes
+            // Dark theme
+            darkTheme.editorBgColor = new SolidColorBrush(Color.FromRgb(57, 62, 70));
+            darkTheme.fileEditorBgColor = new SolidColorBrush(Color.FromRgb(57, 62, 70));
+            darkTheme.fileEditorFgColor = new SolidColorBrush(Color.FromRgb(238, 238, 238));
+            darkTheme.editorFgColor = new SolidColorBrush(Color.FromRgb(78, 204, 163));
+            darkTheme.tabItemBgColor = new SolidColorBrush(Color.FromRgb(57, 62, 70));
+            darkTheme.tabItemFgColor = new SolidColorBrush(Color.FromRgb(78, 204, 163));
 
+            // White Theme
+            lightTheme.editorBgColor = Brushes.White;
+            lightTheme.editorFgColor = Brushes.Black;
+            lightTheme.fileEditorBgColor = Brushes.White;
+            lightTheme.fileEditorFgColor = Brushes.Black;
+            lightTheme.tabItemBgColor = Brushes.White;
+            lightTheme.tabItemFgColor = Brushes.Black;
+            // Apply Theme
+            if (Settings.Default.theme == 0)
+            {
+                theme = Themes.LightTheme;
+                currentTheme = lightTheme;
+            }
+            else
+            {
+                theme = Themes.DarkTheme;
+                currentTheme = darkTheme;
+            }
+            DynamicTab.Background = currentTheme.tabItemBgColor;
+            DynamicTab.Foreground = currentTheme.tabItemFgColor;
+            fileViewer.Background = currentTheme.fileEditorBgColor;
+
+            // Configure GUI
+            if (Settings.Default.theme == 0)
+            {
+                lightThemeRadioBtn.IsChecked = true;
+            }
+            else
+            {
+                darkThemeRadioBtn.IsChecked = true; 
+            } 
+        }
+
+        // Command bindings and shortcuts
+        private void SaveBinding(object sender, ExecutedRoutedEventArgs e)
+        {
+            SaveFile();
+        }
+
+        private void SaveAllBinding(object sender, ExecutedRoutedEventArgs e)
+        {
+            SaveAllFiles();
+        }
+
+        private void OpenProjectBinding(object sender, ExecutedRoutedEventArgs e)
+        {
+            OpenProject();
+        }
+
+        private void RunBinding(object sender, ExecutedRoutedEventArgs e)
+        {
+            Run(null, null);
         }
 
         // Tab Methods
@@ -119,6 +210,9 @@ namespace CreateIDE
             tabEditor.TextArea.TextEntered += textEditor_TextArea_TextEntered;
             tabItem.Content = tabEditor;
             tabEditor.ShowLineNumbers = true;
+            // Apply Styling
+            tabEditor.Background = currentTheme.editorBgColor;
+            tabEditor.Foreground = currentTheme.editorFgColor;
             textEditor = tabEditor;
             tabItems.Add(tabItem);
             // Set it up
@@ -156,11 +250,13 @@ namespace CreateIDE
 
         private void CloseTab(object sender, MouseButtonEventArgs e)
         {
+            Image img;
+            StackPanel stkpanel;
             TabItem tab = null;
             try
             {
-                Image img = (Image)sender;
-                StackPanel stkpanel = (StackPanel)img.Parent;
+                img = (Image)sender;
+                stkpanel = (StackPanel)img.Parent;
                 tab = (TabItem)stkpanel.Parent;
                 
                 if (tab.Tag.ToString() != "welcome") // Just to prevent crushes and exceptions
@@ -171,6 +267,7 @@ namespace CreateIDE
                         SaveFile();
                     }
                 }
+
             }
             catch (FileNotFoundException)
             {
@@ -187,7 +284,6 @@ namespace CreateIDE
                 {
                     AddWelcomeTab();
                 }
-
             }
             
         }
@@ -224,7 +320,6 @@ namespace CreateIDE
                 DynamicTab.SelectedIndex = tabItems.Count - 1;
             }
         }
-
 
         private void TabSelectionChanged(object sender, RoutedEventArgs e)
         {
@@ -418,7 +513,7 @@ namespace CreateIDE
         {
             try
             {
-                ioHandler.OpenProject(encoding, out projectPath, out projectFolderPath, out projectName, out projectVersion);
+                ioHandler.OpenProject(encoding, projectFolderPath, PROJECT_SAVE_FILE_DATA_LENGHT, out projectPath, out projectFolderPath, out projectName, out projectVersion);
             }
             catch (IOException)
             {
@@ -427,13 +522,12 @@ namespace CreateIDE
             }
             catch (IndexOutOfRangeException)
             {
-                System.Windows.MessageBox.Show("The project file is either corrupted or out of date", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+
             }
             // Configure accordingly
             if (textEditor != null  && text != textEditor.Text)
             {
-                // Save
+                SaveAllFiles();
             }
             CreateFileView();
             this.Title = $"{projectName} - CreateIDE";
@@ -444,9 +538,9 @@ namespace CreateIDE
             SaveFile();
         } // Just calls the overload
 
-        private void SaveFile(bool executedFromCode = false)
+        private void SaveFile()
         {
-            if (filepath != null && !executedFromCode)
+            if (filepath != null)
             {
                 filename = Path.GetFileName(filepath);
                 File.WriteAllText(filepath, textEditor.Text);
@@ -480,10 +574,57 @@ namespace CreateIDE
 
             }
         }
+        private void SaveAllFiles()
+        {
+            foreach (string s in Directory.GetFileSystemEntries(projectFolderPath, "*", SearchOption.AllDirectories))
+            {
+                if (!Directory.Exists(s))
+                {
+                    foreach (TabItem tab in tabItems)
+                    {
+                        if (tab.Tag.ToString() == s)
+                        {
+                            TextEditor tempEditor = (TextEditor)tab.Content;
+                            File.WriteAllText(s, tempEditor.Text);
+                            tempEditor = null;
+                        }
+                    }
+                }
+            }
+        }
 
+        private void SaveAllFiles(object sender, RoutedEventArgs e)
+        {
+            SaveAllFiles();
+        } // Calls the overload
+
+        private void PrintFile(object sender, RoutedEventArgs e)
+        {
+            using (var pd = new System.Windows.Forms.PrintDialog())
+            {
+                try
+                {
+                    pd.ShowDialog();
+                    var info = new ProcessStartInfo()
+                    {
+                        Verb = "print",
+                        CreateNoWindow = true,
+                        FileName = filepath,
+                        WindowStyle = ProcessWindowStyle.Normal
+                    };
+                    Process.Start(info);
+                }
+                catch
+                {
+
+                }
+            }
+        }
         private void Exit(object sender, RoutedEventArgs e)
         {
             // Check  if there are unsaved changes
+            SaveAllFiles();
+            // Now shutdown
             System.Windows.Application.Current.Shutdown();
         }
 
@@ -496,6 +637,7 @@ namespace CreateIDE
                 return;
             } // So no Exception occurs during runtime
 
+            fileViewer.Background = currentTheme.fileEditorBgColor;
 
             foreach (string s in Directory.GetFileSystemEntries(projectFolderPath, "*", SearchOption.TopDirectoryOnly))
             {
@@ -503,6 +645,7 @@ namespace CreateIDE
                 StylizeTreeViewItem(s, item);
                 item.Tag = s;
                 item.FontWeight = FontWeights.Normal;
+                item.Foreground = currentTheme.fileEditorFgColor;
                 item.Expanded += new RoutedEventHandler(folder_Expanded);
                 item.MouseRightButtonUp += FileViewElementRightClicked;
                 item.MouseDoubleClick += FileViewElementDoubleClick;
@@ -583,11 +726,11 @@ namespace CreateIDE
                 {
                     item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/db.png");
                 }
-                else if (tempfilename.EndsWith(".xml") || tempfilename.EndsWith(".json"))
+                else if (tempfilename.EndsWith(".xml") || tempfilename.EndsWith(".json") || tempfilename.EndsWith(".xaml"))
                 {
                     item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/xml.png");
                 }
-                else if (tempfilename.EndsWith(".txt"))
+                else if (tempfilename.EndsWith(".txt") || tempfilename.EndsWith(".rtf"))
                 {
                     item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/txt.png");
                 }
@@ -618,6 +761,10 @@ namespace CreateIDE
                 else if (tempfilename.EndsWith(".html") || tempfilename.EndsWith(".htm"))
                 {
                     item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/html.png");
+                }
+                else if (tempfilename.EndsWith(".pdb"))
+                {
+                    item.Header = CustomizeTreeViewItem(tempfilename, "/Icons/pdb.png");
                 }
                 else
                 {
@@ -661,6 +808,7 @@ namespace CreateIDE
                         TreeViewItem subitem = new TreeViewItem();
                         StylizeTreeViewItem(s, subitem);
                         subitem.Tag = s;
+                        subitem.Foreground = currentTheme.fileEditorFgColor;
                         subitem.FontWeight = FontWeights.Normal;
                         subitem.Expanded += new RoutedEventHandler(folder_Expanded);
                         subitem.MouseRightButtonUp += FileViewElementRightClicked;
@@ -706,6 +854,69 @@ namespace CreateIDE
         private void Delete(object sender, RoutedEventArgs e)
         {
             textEditor.Delete();
+        }
+
+        private void goToLine(object sender, RoutedEventArgs e)
+        {
+            int intLine = -1; 
+            string strLine = null;
+            if (Dialogs.InputBox("Go To", "Line", "", ref strLine) == System.Windows.Forms.DialogResult.OK)
+            {
+                int.TryParse(strLine, out intLine);
+                if (intLine > -1)
+                {
+                    double vertOffset = (textEditor.TextArea.TextView.DefaultLineHeight) * intLine;
+                    textEditor.ScrollToVerticalOffset(vertOffset);
+                }
+            }
+        }
+
+        // View Menu Commands
+
+        private void themeChanged(object sender, RoutedEventArgs e)
+        {
+            // Update the Theme variable
+            if ((bool)lightThemeRadioBtn.IsChecked)
+            {
+                theme = Themes.LightTheme;
+            }
+            else
+            {
+                theme = Themes.DarkTheme;
+            }
+            // Update the actual theme
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            switch (theme)
+            {
+                case Themes.LightTheme:
+                    theme = Themes.LightTheme;
+                    currentTheme = lightTheme;
+                    // Save theme
+                    Settings.Default.theme = 0;
+                    Settings.Default.Save();
+                    Restart();
+                    break;
+                case Themes.DarkTheme:
+                    theme = Themes.DarkTheme;
+                    // Save theme
+                    Settings.Default.theme = 1;
+                    Settings.Default.Save();
+                    currentTheme = darkTheme;
+                    Restart();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void Restart()
+        {
+            Application.Current.Shutdown();
+            System.Windows.Forms.Application.Restart();
         }
 
         // Context Menu Commands
@@ -924,7 +1135,7 @@ namespace CreateIDE
             {
                 // Compile
                 compiler.CompileToExe(Path.Combine(projectFolderPath, "bin"), projectFolderPath, references, projectName.Split('.')[0], sourceFile,
-                    WarningLvl, TreatWarningsAsErrors, compilerOptions, IncludeDebugInfo, startMethod);
+                    WarningLvl, TreatWarningsAsErrors, compilerOptions, IncludeDebugInfo);
             } else
             {
                 compiler.CompileToDLL(Path.Combine(projectFolderPath, "bin"), projectFolderPath, references, projectName.Split('.')[0], sourceFile,
@@ -943,6 +1154,19 @@ namespace CreateIDE
         {
             RunConfig window = new RunConfig();
             window.Show();
+        }
+
+        // Help Menu
+        private void GotoWebsite(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start(PROJECT_URL);
+            }
+            catch
+            {
+
+            }
         }
 
         // The class for the auto-completion items

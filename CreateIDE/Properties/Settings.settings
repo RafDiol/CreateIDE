@@ -17,9 +17,6 @@
     <Setting Name="autoRun" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="startMethod" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Main</Value>
-    </Setting>
     <Setting Name="warningLvl" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
@@ -28,6 +25,9 @@
     </Setting>
     <Setting Name="includeDebugInfo" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="theme" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

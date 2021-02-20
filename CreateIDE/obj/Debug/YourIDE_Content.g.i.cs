@@ -20,6 +20,7 @@
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/exiticon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/fonticon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/html.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/pdb.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/img.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/pasteicon.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/pdf.png")]
@@ -35,6 +36,7 @@
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/unknown.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/folder.png")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("icons/zip.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("license.txt")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("presets/csharp.txt")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("presets/html.txt")]
 

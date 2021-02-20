@@ -260,3 +260,5 @@ C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Notifications.Wpf.
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\FontAwesome.WPF.xml
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Microsoft.Xaml.Behaviors.pdb
 C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Microsoft.Xaml.Behaviors.xml
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\License.txt
+C:\Users\rafae\Documents\GitHub\CreateIDE\CreateIDE\bin\Debug\Icons\pdb.png

@@ -83,7 +83,7 @@ namespace CreateIDE
             Directory.Delete(target_dir, false);
         }
 
-        public void OpenProject(Encoding encoding, out string projectPath, out string projectFolderPath, out string projectName, out string version)
+        public void OpenProject(Encoding encoding, string def_projectPath, int projectFileDataLenght,out string projectPath, out string projectFolderPath, out string projectName, out string version)
         {
             try
             {
@@ -93,12 +93,22 @@ namespace CreateIDE
                 OpenFileDialog fd = new OpenFileDialog();
                 fd.FilterIndex = 1;
                 fd.Filter = "Project Creation (*.prj)|*.prj";
+
+                if (def_projectPath != null)
+                {
+                    fd.InitialDirectory = def_projectPath;
+                } 
+
                 if (fd.ShowDialog() == DialogResult.OK) // Successfully selected a file
                 {
                     projectPath = fd.FileName;
                     projectFolderPath = System.IO.Path.GetDirectoryName(projectPath);
                     text = File.ReadAllText(fd.FileName, encoding);
                     data = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                    if (data.Length > projectFileDataLenght)
+                    {
+                        throw new IndexOutOfRangeException();
+                    }
                     version = data[0];
                     projectName = fd.SafeFileName;
                 }
