@@ -135,31 +135,10 @@ namespace CreateIDE
             lightTheme.fileEditorFgColor = Brushes.Black;
             lightTheme.tabItemBgColor = Brushes.White;
             lightTheme.tabItemFgColor = Brushes.Black;
-            // Apply Theme
-            if (Settings.Default.theme == 0)
-            {
-                theme = Themes.LightTheme;
-                currentTheme = lightTheme;
-            }
-            else
-            {
-                theme = Themes.DarkTheme;
-                currentTheme = darkTheme;
-            }
-            DynamicTab.Background = currentTheme.tabItemBgColor;
-            DynamicTab.Foreground = currentTheme.tabItemFgColor;
-            fileViewer.Background = currentTheme.fileEditorBgColor;
 
-            // Configure GUI
-            if (Settings.Default.theme == 0)
-            {
-                lightThemeRadioBtn.IsChecked = true;
-            }
-            else
-            {
-                darkThemeRadioBtn.IsChecked = true; 
-            } 
+            ApplyTheme();
         }
+
 
         // Command bindings and shortcuts
         private void SaveBinding(object sender, ExecutedRoutedEventArgs e)
@@ -208,8 +187,8 @@ namespace CreateIDE
             tabEditor.FontSize = 15;
             tabEditor.TextArea.TextEntering += textEditor_TextArea_TextEntering;
             tabEditor.TextArea.TextEntered += textEditor_TextArea_TextEntered;
-            tabItem.Content = tabEditor;
             tabEditor.ShowLineNumbers = true;
+            tabItem.Content = tabEditor;
             // Apply Styling
             tabEditor.Background = currentTheme.editorBgColor;
             tabEditor.Foreground = currentTheme.editorFgColor;
@@ -895,28 +874,38 @@ namespace CreateIDE
                 case Themes.LightTheme:
                     theme = Themes.LightTheme;
                     currentTheme = lightTheme;
-                    // Save theme
-                    Settings.Default.theme = 0;
-                    Settings.Default.Save();
-                    Restart();
+                    darkThemeRadioBtn.IsChecked = false;
+                    lightThemeRadioBtn.IsChecked = true;
+                    internalApply();
                     break;
                 case Themes.DarkTheme:
                     theme = Themes.DarkTheme;
-                    // Save theme
-                    Settings.Default.theme = 1;
-                    Settings.Default.Save();
                     currentTheme = darkTheme;
-                    Restart();
+                    darkThemeRadioBtn.IsChecked = true;
+                    lightThemeRadioBtn.IsChecked = false;
+                    internalApply();
                     break;
                 default:
                     break;
             }
         }
 
-        private void Restart()
+        private void internalApply()
         {
-            Application.Current.Shutdown();
-            System.Windows.Forms.Application.Restart();
+            DynamicTab.Background = currentTheme.tabItemBgColor;
+            DynamicTab.Foreground = currentTheme.tabItemFgColor;
+            fileViewer.Background = currentTheme.fileEditorBgColor;
+            CreateFileView(); // Refresh
+            // Change the background of each open editor
+            foreach (TabItem tabItem in tabItems)
+            {
+                if (tabItem.Tag.ToString() != "welcome")
+                {
+                    TextEditor tabEditor = tabItem.Content as TextEditor;
+                    tabEditor.Background = currentTheme.editorBgColor;
+                    tabEditor.Foreground = currentTheme.editorFgColor;
+                }
+            }
         }
 
         // Context Menu Commands
